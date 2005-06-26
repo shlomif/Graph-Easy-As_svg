@@ -1,0 +1,44 @@
+
+Graph-Easy
+==========
+
+This package was formerly known as Graph::Easy.
+
+To install this module type the following:
+
+Untar the package:
+
+	tar -xzf Graph-Easy-0.18.tar.gz
+
+Change into the directory:
+
+	chdir Graph-Easy-0.18/
+
+Verify the package:
+
+	cpansign --verify
+
+If the package fails to verify, do NOT run Makefile.pl nor install it and
+notify me immidiately. YOUR SYSTEM MIGHT GET COMPROMISED! 
+
+When the package verified okay, then proceed:
+
+        perl Makefile.PL
+
+If you get warnings about missing or outdated modules, then
+upgrade/install these first. Then run the testsuite:
+
+        make test
+
+If all tests pass, install the package:
+
+        sudo make install
+
+AUTHOR
+======
+
+Copyright (C) 2004 - 2005 by Tels http://bloodgate.com/perl/
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms of the GPL version 2.
+

@@ -1,0 +1,38 @@
+This file contains message digests of all files listed in MANIFEST,
+signed via the Module::Signature module, version 0.42.
+
+To verify the content in this distribution, first make sure you have
+Module::Signature installed, then type:
+
+    % cpansign -v
+
+It will check each file's integrity, as well as the signature's
+validity.  If "==> Signature verified OK! <==" is not displayed,
+the distribution may already have been compromised, and you should
+not run its Makefile.PL or Build.PL.
+
+-----BEGIN PGP SIGNED MESSAGE-----
+
+SHA1 af183fe1d51dd680c476fd5f99ca918e21ed0772 CHANGES
+SHA1 b85ea1f2588a60ac7c6cf136db4f656e21b3cbcb INSTALL
+SHA1 02154445bc9831e791c35050f1a018ed99030016 LICENSE
+SHA1 246954041598473b1316e842239d16cd35be61b8 MANIFEST
+SHA1 18193583c25247422b3dc2c051d06e3ba709a16a META.yml
+SHA1 dc4a483f195a25fec488fcec0014e56dac59a5ab Makefile.PL
+SHA1 f56517dd00102e1db1e4ec4ba1f0b6b89a0ed382 README
+SHA1 5fab94c48b070a31d722a92e5afa862d89bf7413 TODO
+SHA1 8456c5b0a2669f028bba287f6e9150351a719370 examples/as_svg
+SHA1 5ca2b55c337d1a110aa8997ff8f4c7d1dbfe22ee lib/Graph/Easy/As_svg.pm
+SHA1 0867fbe12decaeacaf4ca01eb10b4c77397d332e t/svg.t
+SHA1 6fd96a870d1a6509431c1296ec14326fc0839788 t/svg/svg.txt
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.2.4 (GNU/Linux)
+
+iQEVAwUBQr1EZ3cLPEOTuEwVAQGtFwf+OkD/10cX1Z+RpPSWR6BcpZSNtzb71Cim
+ve6reD9sZXeut2ZJVO5Pru19qBq2Icat4nWnICFFoUB+J9QjLKz1WY7nXEdMg74c
+LT+wH588B+44AN+o2HhkWabJZATZNoq8DSTAbTH9NQbPJ62anLtJqXL7yGFdaENM
+iRIMrz8ObIewpKmoVI2zThGCgQx7thy+DsbhwpXNu6zKCF7NabLbRUVpGqGvIlT5
+FesSQIjrPBUGYnsAKKl6zABF5y9cBvElRE0AVSQPch48qsvVH5Tv/U8h6XiiLuwK
+Chr9rwf/GOaha7Di74ocbGAfeGX+eWU7U21RLLOLGesx5p7NjcDEeA==
+=iGAo
+-----END PGP SIGNATURE-----

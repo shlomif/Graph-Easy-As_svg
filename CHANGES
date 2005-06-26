@@ -1,0 +1,14 @@
+Revision history for Graph::Easy::As_svg:
+
+Seperated Graph::Easy::As_svg from Graph::Easy:
+
+2005-06-25 v0.05 Tels 31 tests - Fix, fix, fix, fix the bugs...
+  * Much more complete: output class attributes, stylesheets etc.
+  * generate SVG 1.1
+  * use "stroke-linecap: round" to generate nicer arrow heads
+  * shorten output by using a few tricks
+  * render node borders in different styles (dotted etc)
+  * render edge lines in different styles (dotted etc)
+
+For older CHANGES, please see the Graph::Easy package.
+

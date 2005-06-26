@@ -1,0 +1,13 @@
+CHANGES
+INSTALL
+Makefile.PL
+MANIFEST
+LICENSE
+README
+SIGNATURE
+TODO
+examples/as_svg			parse text and output as standalone SVG
+t/svg.t				SVG output
+t/svg/svg.txt
+lib/Graph/Easy/As_svg.pm	generate SVG output
+META.yml			Module meta-data (added by MakeMaker)

@@ -1,0 +1,9 @@
+  [ Bonn ] --> [ Berlin ] { shape: circle; }
+  [ Bonn ] --> [ Frankfurt ] { background: #deadff; }
+  [ Berlin ] ..> [ Cottbus ] { shape: ellipse; }
+  [ Berlin ] -> { color: green; } [ Bonn ] { background: #ffdead; }
+  [ Cottbus ] -> [ Frankfurt ]
+  [ Berlin ] -> [ Ulm ]
+  [ Ulm ] -> { color: #a02020; } [ Koblenz]
+  [ Ulm ] -> [ Konstanz ] { shape: diamond; }
+

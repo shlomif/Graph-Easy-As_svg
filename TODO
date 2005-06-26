@@ -1,0 +1,30 @@
+Graph-Easy-As_svg
+=================
+
+See Graph::Easy under LIMITATIONS for some hot topics.
+
+In addition:
+
+Output:
+
+* support different edge starting point styles ala:
+
+  ----->  |----->  o----->  +----->  *----->  >>----->
+
+* use stylesheets to make code shorter
+* edges with different styles than "solid" need solid arrowheads
+* the size of a node does not only depend on the number of
+  characters, but also on their size: "iii" is shorter than
+  "WWW", unlike in ASCII
+* instead of rendering individual edge cells, we should create
+  one path, this would allow better rendering of non-solid
+  edges, like dashed or dotted ones
+* different parts of one edge are scattered around the output,
+  these should be output one after one at the same time
+* sorting output groups on class, and then combining them would
+  shorten the output considerable
+* support "\n" in labels/titles
+* draw octagon/hexagon etc shapes
+* support for background-colored group cells
+* better support for different shapes (circle, box, rounded, polygon etc)
+
