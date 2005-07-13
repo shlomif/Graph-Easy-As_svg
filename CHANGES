@@ -2,6 +2,10 @@ Revision history for Graph::Easy::As_svg:
 
 Seperated Graph::Easy::As_svg from Graph::Easy:
 
+2005-07-13 v0.06 Tels 31 tests - Fix, fix, fix, fix the bugs...
+  * require Graph::Easy 0.22
+  * As_svg: use Graph::Easy to allow a require w/o Graph::Easy
+
 2005-06-25 v0.05 Tels 31 tests - Fix, fix, fix, fix the bugs...
   * Much more complete: output class attributes, stylesheets etc.
   * generate SVG 1.1

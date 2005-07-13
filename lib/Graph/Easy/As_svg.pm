@@ -8,7 +8,9 @@ package Graph::Easy::As_svg;
 
 use vars qw/$VERSION/;
 
-$VERSION = '0.05';
+$VERSION = '0.06';
+
+use Graph::Easy;
 
 #############################################################################
 #############################################################################
@@ -559,7 +561,7 @@ sub _correct_size_svg
   #my $border = $self->{edge}->attribute('border-style') || 'none';
 
   # set the minimum width/height
-  my $type = $self->{type} & EDGE_TYPE_MASK;
+  my $type = $self->{type} & EDGE_TYPE_MASK();
   my $dim = $dimensions->{$type} || [ 2, 2 ];
   ($self->{w}, $self->{h}) = ($dim->[0] * $em, $dim->[1] * $em);
   }
@@ -628,7 +630,7 @@ sub as_svg
  
   my $label = $self->label();
 
-  if (($self->{type} & EDGE_LABEL_CELL))
+  if (($self->{type} & EDGE_LABEL_CELL()))
     {
     my $xt = int($x + $em * 0.2 + $self->{w} / 4);
     my $yt = int($y + $em + $em * 0.2);
