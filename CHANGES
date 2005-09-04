@@ -1,10 +1,23 @@
 Revision history for Graph::Easy::As_svg:
 
-Seperated Graph::Easy::As_svg from Graph::Easy:
+2005-09-04 v0.07 Tels 38 tests - Fix, fix, fix, fix the bugs...
+  * require Graph::Easy 0.27
+  * added tests for as_svg_file()
+  * fix rendering of edge cells to be compatible with new Graph::Easy code
+  * arrow lines on non-solid edges are now solid (instead of dashed etc)
+  * render the different arrow styles (closed, open, filled)
+  * render nodes with "shape: point"
+  * produce shorter code by using default attributes/classes better 
+  * render node shapes: diamond, house, triangle, invtriangle
+  * render edge style "double-dash"
+  * "fill" is the fill color, "background" the background
+  * better skipping of non-SVG attributes
 
 2005-07-13 v0.06 Tels 31 tests - Fix, fix, fix, fix the bugs...
   * require Graph::Easy 0.22
   * As_svg: use Graph::Easy to allow a require w/o Graph::Easy
+
+Seperated Graph::Easy::As_svg from Graph::Easy:
 
 2005-06-25 v0.05 Tels 31 tests - Fix, fix, fix, fix the bugs...
   * Much more complete: output class attributes, stylesheets etc.

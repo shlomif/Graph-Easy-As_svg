@@ -11,8 +11,7 @@ Output:
 
   ----->  |----->  o----->  +----->  *----->  >>----->
 
-* use stylesheets to make code shorter
-* edges with different styles than "solid" need solid arrowheads
+* implement border-style: double, wave and double-dash
 * the size of a node does not only depend on the number of
   characters, but also on their size: "iii" is shorter than
   "WWW", unlike in ASCII
@@ -26,5 +25,6 @@ Output:
 * support "\n" in labels/titles
 * draw octagon/hexagon etc shapes
 * support for background-colored group cells
-* better support for different shapes (circle, box, rounded, polygon etc)
+* we could put the "stroke" and "stroke-width" on the <g class="edge" ...>,
+  this would generate shorter code for edge pieces
 

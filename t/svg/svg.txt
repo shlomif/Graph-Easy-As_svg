@@ -1,9 +1,26 @@
-  [ Bonn ] --> [ Berlin ] { shape: circle; }
-  [ Bonn ] --> [ Frankfurt ] { background: #deadff; }
+  [ Bonn ] - > [ Berlin ] { shape: circle; fill: darkslategrey; background: brown; color: white; }
+  [ Bonn ] ==> [ Frankfurt ] { fill: #deadff; }
   [ Berlin ] ..> [ Cottbus ] { shape: ellipse; }
-  [ Berlin ] -> { color: green; } [ Bonn ] { background: #ffdead; }
-  [ Cottbus ] -> [ Frankfurt ]
-  [ Berlin ] -> [ Ulm ]
-  [ Ulm ] -> { color: #a02020; } [ Koblenz]
-  [ Ulm ] -> [ Konstanz ] { shape: diamond; }
+  [ Berlin ] -> { color: green; } [ Bonn ] { fill: #ffdead; }
+  [ Cottbus ] = > [ Frankfurt ]
+  [ Berlin ] -> { arrow-style: closed; } [ Ulm ]
+  [ Ulm ] { shape: house; } .-> { color: #a02020; } [ Koblenz]
+  [ Ulm ] ..-> [ Konstanz ] { shape: diamond; }
+  
+  [ Konstanz ] --> { arrow-style: filled; fill: red; } [ Mainz ] { shape: triangle; }
+ 
+  [ Koblenz ] { shape: invtriangle; } 
 
+node.point { shape: point; flow: south; }
+
+( Stars   
+  [ A ] { point-style: star; color: red; } ->		# background ignored
+  [ B ] { point-style: circle; fill: dodgerblue; } ->
+  [ C ] { point-style: circle; fill: white; } ->
+  [ D ] { point-style: square; fill: firebrick; flow: west; } ->
+  [ E ] { point-style: diamond; fill: lime; } ->
+  [ F ] { shape: invisible; background: coral; } ->
+  [ G ] { point-style: dot; color: slategrey; } ->	# background ignored
+  [ H ] { point-style: circle; fill: black; } ->
+  [ I ] { point-style: cross; color: darkblue; }	# fill ignored
+) { nodeclass: point; }
