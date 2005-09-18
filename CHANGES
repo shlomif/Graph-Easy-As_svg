@@ -1,5 +1,23 @@
 Revision history for Graph::Easy::As_svg:
 
+2005-09-18 v0.08 Tels 40 tests - Fix, fix, fix, fix the bugs...
+  * require Graph::Easy 0.29
+  * 'fill' defaults to white
+  * edge labels use "label-color" and fall back to "color"
+  * improve support for multi-line labels
+  * fix bidirectional edges (render their arrows correctly)
+  * better center the text on triangle|invtriangel shaped nodes
+  * better node sizes for the various shapes
+  * draw graph background and border if nec.
+  * double lines on edges are rendered better at the arrow-ends
+  * add support for the following node shapes:
+    + invhouse, octagon, hexagon, septagon, parallelogram, trapezium 
+  * draw background for non-rect nodes
+  * correctly draw "border-style: double" on the various node shapes
+  * draw backgrounds for edge cells (for groups and when background is set)
+  * add tests for POD via Test::POD (t/pod.t)
+  * add tests for POD coverage via Test::POD::Coverage (t/pod_cov.t)
+
 2005-09-04 v0.07 Tels 38 tests - Fix, fix, fix, fix the bugs...
   * require Graph::Easy 0.27
   * added tests for as_svg_file()

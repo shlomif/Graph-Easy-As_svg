@@ -1,20 +1,24 @@
-Graph-Easy-As_svg
-=================
+Todo for Graph-Easy-As_svg
+==========================
 
-See Graph::Easy under LIMITATIONS for some hot topics.
+Output bugs:
 
-In addition:
-
-Output:
-
+* render the graph label (aka caption)
 * support different edge starting point styles ala:
 
   ----->  |----->  o----->  +----->  *----->  >>----->
 
-* implement border-style: double, wave and double-dash
+* implement border- and edge-style: wave
 * the size of a node does not only depend on the number of
   characters, but also on their size: "iii" is shorter than
   "WWW", unlike in ASCII
+* better support "\n" in labels/titles (line breaks are broken)
+  (subsequent tspans need 'x="xxx"' on them)
+* edges with style "double" have gaps
+* crossing edge pieces are drawn incorrect
+
+Shorter output:
+
 * instead of rendering individual edge cells, we should create
   one path, this would allow better rendering of non-solid
   edges, like dashed or dotted ones
@@ -22,9 +26,8 @@ Output:
   these should be output one after one at the same time
 * sorting output groups on class, and then combining them would
   shorten the output considerable
-* support "\n" in labels/titles
-* draw octagon/hexagon etc shapes
-* support for background-colored group cells
+* output all cell backgrounds first (to avoid overlap of content and also
+  so that we can combine them to bigger rectangles if possible)
 * we could put the "stroke" and "stroke-width" on the <g class="edge" ...>,
   this would generate shorter code for edge pieces
 

@@ -34,7 +34,7 @@ WriteMakefile(
     NAME		=> 'Graph::Easy::As_svg',
     VERSION_FROM	=> 'lib/Graph/Easy/As_svg.pm', # finds $VERSION
     PREREQ_PM		=> {
-	'Graph::Easy' => 0.27,
+	'Graph::Easy' => 0.29,
 	},
     ($] >= 5.005 ?     ## Add these new keywords supported since 5.005
       (ABSTRACT_FROM  => 'lib/Graph/Easy/As_svg.pm', # retrieve abstract from module
