@@ -1,5 +1,10 @@
 Revision history for Graph::Easy::As_svg:
 
+2005-09-23 v0.09 Tels 41 tests - Fix, fix, fix, fix the bugs...
+  * require Graph::Easy 0.30
+  * fix README
+  * fix SVG header (standlone="yes", xmlns for <svg tag)
+
 2005-09-18 v0.08 Tels 40 tests - Fix, fix, fix, fix the bugs...
   * require Graph::Easy 0.29
   * 'fill' defaults to white

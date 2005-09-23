@@ -5,7 +5,7 @@ use strict;
 
 BEGIN
    {
-   plan tests => 38;
+   plan tests => 39;
    chdir 't' if -d 't';
    use lib '../lib';
    use_ok ("Graph::Easy") or die($@);
@@ -65,7 +65,8 @@ unlike ($svg, qr/<text.*?><\/text>/, "doesn't contain empty text tags");
 $svg = $graph->as_svg_file();
 
 like ($svg, qr/Bonn/, 'contains Bonn');
-like ($svg, qr/standalone="no"/, 'standalone');
+like ($svg, qr/standalone="yes"/, 'standalone');
+like ($svg, qr/xmlns="/, 'xmlns');
 like ($svg, qr/<\?xml/, 'contains <xml');
 
 #print $graph->as_svg(),"\n";
