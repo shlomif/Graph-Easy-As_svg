@@ -3,7 +3,6 @@ Todo for Graph-Easy-As_svg
 
 Output bugs:
 
-* render the graph label (aka caption)
 * support different edge starting point styles ala:
 
   ----->  |----->  o----->  +----->  *----->  >>----->
@@ -12,10 +11,10 @@ Output bugs:
 * the size of a node does not only depend on the number of
   characters, but also on their size: "iii" is shorter than
   "WWW", unlike in ASCII
-* better support "\n" in labels/titles (line breaks are broken)
-  (subsequent tspans need 'x="xxx"' on them)
-* edges with style "double" have gaps
-* crossing edge pieces are drawn incorrect
+* edges with style "double" have gaps on corner pieces
+* multi-line text labels and text-labels on ver edges cross into the edge line
+* implement arrow-style: none
+* implement background/border drawing for Graph::Easy::Group::Cell
 
 Shorter output:
 
@@ -28,6 +27,10 @@ Shorter output:
   shorten the output considerable
 * output all cell backgrounds first (to avoid overlap of content and also
   so that we can combine them to bigger rectangles if possible)
-* we could put the "stroke" and "stroke-width" on the <g class="edge" ...>,
-  this would generate shorter code for edge pieces
 
+Browser-specific woes:
+
+* Opera <9.0 does only support SVG Tiny :-( (no tspan etc)
+* Firefox 1.5b2 gets tspan with 'x="..." dy="1em"' wrong
+* Firefox 1.5b2 seems to ignore text-decoration on <text>
+* Batik 1.5.1 has problems with 'font-size="12px"' on <text>

@@ -1,5 +1,35 @@
 Revision history for Graph::Easy::As_svg:
 
+2005-10-30 v0.10 Tels 56 tests - Fix, fix, fix, fix the bugs...
+  * require Graph::Easy 0.31
+  * don't draw background if bg eq ''
+  * add support for attribute "font-size"
+  * add support for attribute "text-style"
+  * calculate the correct size for edge cells with a label  
+  * include xmlns:xlink too, to make Firefox 1.5x happy
+  * include version of Graph::Easy::As_svg in output, too
+  * for edge labels: fallback to the color of the edge did not work
+  * triangle-shaped nodes have equal height/width (if possible)
+  * the "autolink" and "link" attributes correctly create links with
+    mouseover titles
+  * nodes with shape "none" result no longer in invalid SVG
+  * only include the actually used defitinons, that shortens the output,
+    especially for small graphs
+  * don't need to output "stroke-width" for including arrow heads, this
+    shortens the output a bit
+  * shorten output by grouping multiple lines of an edge together
+  * text in (invert)-triangle etc nodes is better displaced to fit better
+  * better rendering of multi-line labels on edges
+  * support multi-line labels on nodes (correct hight, multi-line text)
+  * output fontsize is 14 pixels instead of 11 (for bigger graphs in FF 1.5)
+  * close gaps in hor/ver edge pieces with style "double"
+  * examples/as_svg: input utf8 from STDIN, output utf-8 to STDOUT
+  * Nodes with "shape: rounded" are rounded by a fixed amount
+  * edge crossings with different styles and colors are now rendered correctly
+  * output a title for the SVG graph
+  * output "width" and "height" instead of viewbox on <svg> for Firefox
+  * render the graph label with label-pos bottom or top, incl. optional link
+
 2005-09-23 v0.09 Tels 41 tests - Fix, fix, fix, fix the bugs...
   * require Graph::Easy 0.30
   * fix README
@@ -13,7 +43,7 @@ Revision history for Graph::Easy::As_svg:
   * fix bidirectional edges (render their arrows correctly)
   * better center the text on triangle|invtriangel shaped nodes
   * better node sizes for the various shapes
-  * draw graph background and border if nec.
+  * draw graph background, border and label if nec.
   * double lines on edges are rendered better at the arrow-ends
   * add support for the following node shapes:
     + invhouse, octagon, hexagon, septagon, parallelogram, trapezium 
