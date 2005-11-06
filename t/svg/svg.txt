@@ -2,6 +2,7 @@ graph {
   fill: peru;
   border: 1px dashed blue;
   }
+group { fill: peru; }
 
   [ Bonn ] - > [ Berlin ] { shape: circle; fill: darkslategrey; background: brown; color: white; }
   [ Bonn ] ==> [ Frankfurt ] { fill: #deadff; }

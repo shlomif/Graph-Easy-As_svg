@@ -15,9 +15,7 @@ SKIP:
   skip( 'Test::Pod not installed on this system', 1 )
     unless do
       {
-      eval qq{
-      use Test::Pod
-      };
+      eval "use Test::Pod";
       $@ ? 0 : 1;
       };
   pod_file_ok( '../lib/Graph/Easy/As_svg.pm' );

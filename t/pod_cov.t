@@ -23,6 +23,5 @@ SKIP:
     {
     pod_coverage_ok( $m, "$m is covered" );
     }
-
   }
 

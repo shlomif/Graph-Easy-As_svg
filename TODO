@@ -3,6 +3,8 @@ Todo for Graph-Easy-As_svg
 
 Output bugs:
 
+* Node texts are moved wrongly on rotated nodes (their new
+  center should rotate along with the shape)
 * support different edge starting point styles ala:
 
   ----->  |----->  o----->  +----->  *----->  >>----->

@@ -5,7 +5,7 @@ use strict;
 
 BEGIN
    {
-   plan tests => 54;
+   plan tests => 56;
    chdir 't' if -d 't';
    use lib '../lib';
    use_ok ("Graph::Easy") or die($@);
@@ -179,6 +179,9 @@ $edge->set_attribute('text-style', 'bold underline overline');
 $svg = $graph->as_svg();
 like ($svg, qr/font-weight="bold" text-decoration="underline overline"/, 'text-style');
 
+#############################################################################
+# font-size support
+
 $edge->set_attribute('font-size', '2em');
 
 $svg = $graph->as_svg();
@@ -199,5 +202,13 @@ $svg = $graph->as_svg();
 like ($svg, qr/<title>My Graph Title<\/title>/, 'title overrides label');
 
 
+#############################################################################
+# support for rotate
 
+$bonn->set_attribute( 'rotate' => 'right' );
+
+is ($bonn->attribute('rotate'), '90', 'rotate right is +90 degrees');
+
+$svg = $graph->as_svg();
+like ($svg, qr/rect.*transform="rotate\(90,/, 'rotate right = 90');
 

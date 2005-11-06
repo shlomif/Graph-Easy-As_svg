@@ -8,7 +8,7 @@ package Graph::Easy::As_svg;
 
 use vars qw/$VERSION/;
 
-$VERSION = '0.10';
+$VERSION = '0.11';
 
 use Graph::Easy;
 
@@ -281,6 +281,7 @@ EOSVG
    text-align|
    text-style|
    width|
+   rotate|
    )\z/x;
 
   my $overlay = {
@@ -387,7 +388,7 @@ EOSVG
       my $class = $n->{class}; $class =~ s/\./-/;	# node.city => node-city
       my $indent = '  ';
       $txt .= "<g class=\"$class\">\n";
-      $txt .= $n->as_svg($x,$y,'  ');	# output cell, indented
+      $txt .= $n->as_svg($x,$y,' ');			# output cell, indented
       $txt =~ s/\n\z/<\/g>\n\n/;
       }
     }
@@ -512,6 +513,9 @@ sub as_svg
 
   my $bs = $self->attribute('border-style') || '';
 
+  my $xt = int($x + $self->{w} / 2);
+  my $yt = int($y + $self->{h} / 2);
+
   # render the node shape itself
   if ($shape eq 'point')
     {
@@ -527,9 +531,8 @@ sub as_svg
     $a->{stroke} = $self->attribute('border-color') || 'black';
     $a->{fill} = $a->{stroke} if $s eq 'dot';
 
-    my $att_txt = $self->_svg_attributes_as_txt($a);
-    my $xt = int($x + $self->{w} / 2);
-    my $yt = int($y + $self->{h} / 2);
+    my $att_txt = $self->_svg_attributes_as_txt($a, $xt, $yt);
+
     # center a square point-node
     $yt -= 5 if $s =~ 'square';
     $xt -= 5 if $s =~ 'square';
@@ -540,23 +543,49 @@ sub as_svg
     }
   else
     {
-    my $att_txt = $self->_svg_attributes_as_txt($att);
-
     if ($shape ne 'none')
       {
-      $svg .= "$indent<$shape$att_txt />\n";
+
+      # If we need to draw the border shape twice, put common attributes on
+      # a <g> around it. (In the case there is only "stroke: #000000;" it will
+      # waste 4 bytes, but in all other cases save quite a few.
+
+      my $group = {};
+      if ($bs =~ /^double/)
+        {
+        for my $a (qw/ fill stroke stroke-dasharray/)
+          {
+          $group->{$a} = $att->{$a} if exists $att->{$a}; delete $att->{$a};
+          }
+        }
+
+      my $att_txt = $self->_svg_attributes_as_txt($att, $xt, $yt) || '';
+
+      my $shape_svg = "$indent<$shape$att_txt />\n";
 
       # if border-style is double, do it again, sam.
       if ($bs =~ /^double/)
         {
-        my $att = $self->_svg_attributes($x,$y, 3);
+        my $group_txt = $self->_svg_attributes_as_txt($group, $xt, $yt);
 
-        my $shape = $att->{shape};				# rect, circle etc
+        $shape_svg = "$indent<g$group_txt>\n$indent" . $shape_svg;
+
+        my $att = $self->_svg_attributes($x,$y, 3);
+        for my $a (qw/ fill stroke stroke-dasharray/)
+          {
+          delete $att->{$a};
+          }
+
+        my $shape = $att->{shape};				# circle etc
         delete $att->{shape};
 
-        my $att_txt = $self->_svg_attributes_as_txt( $att );
-        $svg .= "$indent<$shape$att_txt />\n";
+        my $att_txt = $self->_svg_attributes_as_txt( $att, $xt, $yt );
+
+        $shape_svg .= "$indent$indent<$shape$att_txt />\n";
+
+        $shape_svg .= "$indent</g>\n";				# close group
         }
+      $svg .= $shape_svg;
       }
 
     ###########################################################################
@@ -612,7 +641,7 @@ sub _svg_attributes
   my $sub3 = $sub / 3;		# 0.333 * $sub
   my $sub6 = 2 * $sub / 3;	# 0.666 * $sub
 
-  my $form = '%0.4f';		# limit precision to sane values
+  my $form = '%0.2f';		# limit precision to sane values
 
   if ($shape =~ /^(point|none)\z/)
     {
@@ -799,20 +828,21 @@ sub _svg_attributes
   $att->{fill} = $self->attribute('fill') || 'white';
   delete $att->{fill} if $att->{fill} eq 'white';	# white is default
 
+  $att->{rotate} = $self->attribute('rotate') || 0;
   $att;
   }
 
 sub _svg_attributes_as_txt
   {
   # convert hash with attributes to text to be included in SVG tag
-  my ($self, $att) = @_;
+  my ($self, $att, $x, $y) = @_;
 
   my $att_line = '';				# attributes as text (cur line)
   my $att_txt = '';				# attributes as text (all)
   foreach my $e (sort keys %$att)
     {
     # skip these
-    next if $e =~ /^(arrow-style|text-style|label-color|rows|cols|size|offset|origin)\z/;
+    next if $e =~ /^(arrow-style|text-style|label-color|rows|cols|size|offset|origin|rotate)\z/;
 
     $att_line .= " $e=\"$att->{$e}\"";
     if (length($att_line) > 75)
@@ -820,6 +850,18 @@ sub _svg_attributes_as_txt
       $att_txt .= "$att_line\n  "; $att_line = '';
       }
     }
+
+  ###########################################################################
+  # include the rotation
+
+  my $r = $att->{rotate} || 0;
+
+  $att_line .= " transform=\"rotate($r, $x, $y)\"" if $r != 0;
+  if (length($att_line) > 75)
+    {
+    $att_txt .= "$att_line\n  "; $att_line = '';
+    }
+
   $att_txt .= $att_line;
   $att_txt =~ s/\n  \z//;		# avoid a "  >" on last line
   $att_txt;

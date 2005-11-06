@@ -1,6 +1,12 @@
 Revision history for Graph::Easy::As_svg:
 
-2005-10-30 v0.10 Tels 56 tests - Fix, fix, fix, fix the bugs...
+2005-11-06 v0.11 Tels 56 tests - Fix, fix, fix, fix the bugs...
+  * limit precision to 2 digits (instead of 4) for coordinates
+  * put common attributes on double-border shapes into a <g> to shorten output
+  * indent output by ' ' instead of '  ' to shorten it a bit
+  * support "rotate" attribute on Nodes
+
+2005-10-30 v0.10 Tels 56 tests
   * require Graph::Easy 0.31
   * don't draw background if bg eq ''
   * add support for attribute "font-size"
@@ -27,15 +33,15 @@ Revision history for Graph::Easy::As_svg:
   * Nodes with "shape: rounded" are rounded by a fixed amount
   * edge crossings with different styles and colors are now rendered correctly
   * output a title for the SVG graph
-  * output "width" and "height" instead of viewbox on <svg> for Firefox
+  * output "width" and "height" instead of viewbox on <svg> for Firefox 1.5
   * render the graph label with label-pos bottom or top, incl. optional link
 
-2005-09-23 v0.09 Tels 41 tests - Fix, fix, fix, fix the bugs...
+2005-09-23 v0.09 Tels 41 tests
   * require Graph::Easy 0.30
   * fix README
   * fix SVG header (standlone="yes", xmlns for <svg tag)
 
-2005-09-18 v0.08 Tels 40 tests - Fix, fix, fix, fix the bugs...
+2005-09-18 v0.08 Tels 40 tests
   * require Graph::Easy 0.29
   * 'fill' defaults to white
   * edge labels use "label-color" and fall back to "color"
@@ -53,7 +59,7 @@ Revision history for Graph::Easy::As_svg:
   * add tests for POD via Test::POD (t/pod.t)
   * add tests for POD coverage via Test::POD::Coverage (t/pod_cov.t)
 
-2005-09-04 v0.07 Tels 38 tests - Fix, fix, fix, fix the bugs...
+2005-09-04 v0.07 Tels 38 tests
   * require Graph::Easy 0.27
   * added tests for as_svg_file()
   * fix rendering of edge cells to be compatible with new Graph::Easy code
@@ -66,13 +72,13 @@ Revision history for Graph::Easy::As_svg:
   * "fill" is the fill color, "background" the background
   * better skipping of non-SVG attributes
 
-2005-07-13 v0.06 Tels 31 tests - Fix, fix, fix, fix the bugs...
+2005-07-13 v0.06 Tels 31 tests
   * require Graph::Easy 0.22
   * As_svg: use Graph::Easy to allow a require w/o Graph::Easy
 
 Seperated Graph::Easy::As_svg from Graph::Easy:
 
-2005-06-25 v0.05 Tels 31 tests - Fix, fix, fix, fix the bugs...
+2005-06-25 v0.05 Tels 31 tests
   * Much more complete: output class attributes, stylesheets etc.
   * generate SVG 1.1
   * use "stroke-linecap: round" to generate nicer arrow heads
