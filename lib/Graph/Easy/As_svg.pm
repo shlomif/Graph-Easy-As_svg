@@ -8,7 +8,107 @@ package Graph::Easy::As_svg;
 
 use vars qw/$VERSION/;
 
-$VERSION = '0.11';
+$VERSION = '0.12';
+
+use strict;
+
+sub _text_length
+  {
+  # Take a string, and return it's length, based on the fontsize and the
+  # contents ("iii" is shorter than "WWW")
+  my ($em, $text) = @_;
+
+  # For each len entry, count how often it matches the string
+  # if it matches 2 times "[Ww]", and 3 times "[i]" then we have
+  # (X - (2+3)) * EM + 2*$W*EM + 3*$I*EM where X is length($text), and
+  # $W and $I are sizes of "[Ww]" and "[i]", respectively.
+
+  my $count = length($text);
+  my $len = 0; my $match;
+
+  $match = $text =~ tr/'`//;
+  $len += $match * 0.25 * $em; $count -= $match;
+
+  $match = $text =~ tr/Iijl!.,;:\|//;
+  $len += $match * 0.33 * $em; $count -= $match;
+
+  $match = $text =~ tr/"Jft\(\)\[\]\{\}//;
+  $len += $match * 0.4 * $em; $count -= $match;
+
+  $match = $text =~ tr/?//;
+  $len += $match * 0.5 * $em; $count -= $match;
+
+  $match = $text =~ tr/crs_//;
+  $len += $match * 0.55 * $em; $count -= $match;
+
+  $match = $text =~ tr/BEFLPaevyz\\\/-//;
+  $len += $match * 0.6 * $em; $count -= $match;
+
+  $match = $text =~ tr/Zbdghknopqux~//;
+  $len += $match * 0.65 * $em; $count -= $match;
+
+  $match = $text =~ tr/KCVXY%//;
+  $len += $match * 0.7 * $em; $count -= $match;
+
+  $match = $text =~ tr/AHGDSNQU$&//;
+  $len += $match * 0.8 * $em; $count -= $match;
+
+  $match = $text =~ tr/wO=+<>//;
+  $len += $match * 0.85 * $em; $count -= $match;
+
+  $match = $text =~ tr/W//;
+  $len += $match * 0.90 * $em; $count -= $match;
+
+  $match = $text =~ tr/M//;
+  $len += $match * 0.95 * $em; $count -= $match;
+
+  $match = $text =~ tr/m//;
+  $len += $match * 1.03 * $em; $count -= $match;
+
+#  $match = 0; $text =~ s/[ÜÖÄüöäß]/$match++; $1/eg;	# can't handle unicode?
+#  $len += $match * 0.7 * $em; $count -= $match;
+
+  $len += $count * $em;					# anything left over is 1.0
+
+  # return length in "characters"
+  $len / $em;
+  }
+
+sub _quote_name
+  {
+  my $name = shift;
+  my $out_name = $name;
+
+  # "--" is not allowed inside comments:
+  $out_name =~ s/--/- - /g;
+
+  # "&", "<" and ">" will not work in comments, so quote them
+  $out_name =~ s/&/&amp;/g;
+  $out_name =~ s/</&lt;/g;
+  $out_name =~ s/>/&gt;/g;
+
+  $out_name;
+  }
+
+sub _sprintf
+  {
+  my $form = '%0.2f';
+
+  my @rc;
+  for my $x (@_)
+    {
+    my $y = sprintf($form, $x);
+
+    # convert "10.00" to "10"
+    $y =~ s/\.0+\z//;
+    # strip tailing zeros on "0.10", but not from "100"
+    $y =~ s/(\.[0-9]+?)0+\z/$1/;
+
+    push @rc, $y;
+    }
+
+  wantarray ? @rc : $rc[0];
+  }
 
 use Graph::Easy;
 
@@ -111,6 +211,7 @@ my $strokes = {
   'dot-dash' => '2, 2, 4, 2',
   'dot-dot-dash' => '2, 2, 2, 2, 4, 2',
   'double-dash' => '4, 2',
+  'bold-dash' => '4, 2',
   };
 
 sub _svg_use_def
@@ -163,6 +264,12 @@ sub _svg_text
   my ($self, $label, $color, $em, $indent, $x, $y) = @_;
 
   $label =~ s/\s*\\n\s*/\n/g;			# insert real newlines
+
+  # quote "<" and ">" 
+  $label =~ s/&/&amp;/g;
+  $label =~ s/>/&gt;/g;
+  $label =~ s/</&lt;/g;
+
   my @lines = split/\n/,$label;			# split into lines
 
   # We can't just join them togeter with 'x=".." dy="1em"' because Firefox 1.5
@@ -461,6 +568,33 @@ x<tels>
 
 package Graph::Easy::Node;
 
+BEGIN
+  {
+  *_sprintf = \&Graph::Easy::As_svg::_sprintf;
+  }
+
+sub _svg_dimensions
+  {
+  # Returns the dimensions of the node/cell derived from the label (or name) in characters.
+  my $self = shift;
+
+  my $label = $self->{att}->{label}; $label = $self->{name} unless defined $label;
+  $label = '' unless defined $label;
+
+  $label =~ s/\\n/\n/g;
+
+  my @lines = split /\n/, $label;
+  my $w = 0; my $h = scalar @lines;
+  my $em = $self->EM();
+  foreach my $line (@lines)
+    {
+    $line =~ s/^\s+//; $line =~ s/\s+$//;               # rem spaces
+    my $line_length = Graph::Easy::As_svg::_text_length($em, $line);
+    $w = $line_length if $line_length > $w;
+    }
+  ($w,$h);
+  }
+
 sub _svg_background
   {
   # draw the background for this node/cell, if nec.
@@ -506,7 +640,9 @@ sub as_svg
   $att->{title} = $title if $title ne '';
 
   my $s = $self->attribute('shape') || 'rectangle';
-  my $svg = "$indent<!-- $name, $s -->\n";
+
+  my $out_name = Graph::Easy::As_svg::_quote_name($name);
+  my $svg = "$indent<!-- $out_name, $s -->\n";
 
   # render the background, except for "rect" where it is not visible
   $self->_svg_background(\$svg, $x,$y, $indent) if $shape ne 'rect';
@@ -625,6 +761,13 @@ sub _svg_attributes
 
   my $shape = $self->shape();
 
+  my $em = $self->EM();
+  my $border_width = Graph::Easy::_border_width_in_pixels($self,$em);
+
+  # subtract half of our border-width because the border-center would otherwise
+  # be on the node's border-line and thus extending outward:
+  my $bw2 = $border_width / 2; $sub += $bw2;
+
   my $w2 = $self->{w} / 2;
   my $h2 = $self->{h} / 2;
 
@@ -636,12 +779,11 @@ sub _svg_attributes
 
   my $x2 = $x + $self->{w} - $sub;
   my $y2 = $y + $self->{h} - $sub;
+
   $x += $sub; $y += $sub;
 
   my $sub3 = $sub / 3;		# 0.333 * $sub
   my $sub6 = 2 * $sub / 3;	# 0.666 * $sub
-
-  my $form = '%0.2f';		# limit precision to sane values
 
   if ($shape =~ /^(point|none)\z/)
     {
@@ -656,31 +798,31 @@ sub _svg_attributes
     }
   elsif ($shape eq 'parallelogram')
     {
-    my $xll = sprintf($form, $x - $sub3 + $self->{w} * 0.25);
-    my $xrl = sprintf($form, $x2 + $sub3 - $self->{w} * 0.25);
+    my $xll = _sprintf($x - $sub3 + $self->{w} * 0.25);
+    my $xrl = _sprintf($x2 + $sub3 - $self->{w} * 0.25);
 
-    my $xl = sprintf($form, $x + $sub6);
-    my $xr = sprintf($form, $x2 - $sub6);
+    my $xl = _sprintf($x + $sub6);
+    my $xr = _sprintf($x2 - $sub6);
 
     $shape = "polygon points=\"$xll,$y, $xr,$y, $xrl,$y2, $xl,$y2\"";
     }
   elsif ($shape eq 'trapezium')
     {
-    my $xl = sprintf($form, $x - $sub3 + $self->{w} * 0.25);
-    my $xr = sprintf($form, $x2 + $sub3 - $self->{w} * 0.25);
+    my $xl = _sprintf($x - $sub3 + $self->{w} * 0.25);
+    my $xr = _sprintf($x2 + $sub3 - $self->{w} * 0.25);
 
-    my $xl1 = sprintf($form, $x + $sub3);
-    my $xr1 = sprintf($form, $x2 - $sub3);
+    my $xl1 = _sprintf($x + $sub3);
+    my $xr1 = _sprintf($x2 - $sub3);
 
     $shape = "polygon points=\"$xl,$y, $xr,$y, $xr1,$y2, $xl1,$y2\"";
     }
   elsif ($shape eq 'invtrapezium')
     {
-    my $xl = sprintf($form, $x - $sub3 + $self->{w} * 0.25);
-    my $xr = sprintf($form, $x2 + $sub3 - $self->{w} * 0.25);
+    my $xl = _sprintf($x - $sub3 + $self->{w} * 0.25);
+    my $xr = _sprintf($x2 + $sub3 - $self->{w} * 0.25);
 
-    my $xl1 = sprintf($form, $x + $sub3);
-    my $xr1 = sprintf($form, $x2 - $sub3);
+    my $xl1 = _sprintf($x + $sub3);
+    my $xr1 = _sprintf($x2 - $sub3);
 
     $shape = "polygon points=\"$xl1,$y, $xr1,$y, $xr,$y2, $xl,$y2\"";
     }
@@ -689,34 +831,34 @@ sub _svg_attributes
     my $x1 = $cx;
     my $y1 = $cy;
 
-    my $xl = sprintf($form, $x + $sub3);
-    my $xr = sprintf($form, $x2 - $sub3);
+    my $xl = _sprintf($x + $sub3);
+    my $xr = _sprintf($x2 - $sub3);
 
     $shape = "polygon points=\"$xl,$y1, $x1,$y, $xr,$y1, $x1,$y2\" stroke-linecap=\"round\"";
     }
   elsif ($shape eq 'house')
     {
     my $x1 = $cx;
-    my $y1 = sprintf($form, $y - $sub3 + $self->{h} * 0.333);
+    my $y1 = _sprintf($y - $sub3 + $self->{h} * 0.333);
 
     $shape = "polygon points=\"$x1,$y, $x2,$y1, $x2,$y2, $x,$y2, $x,$y1\"";
     }
   elsif ($shape eq 'pentagon')
     {
     my $x1 = $cx;
-    my $x11 = sprintf($form, $x - $sub3 + $self->{w} * 0.25);
-    my $x12 = sprintf($form, $x2 + $sub3 - $self->{w} * 0.25);
-    my $y1 = sprintf($form, $y - $sub6 + $self->{h} * 0.333);
+    my $x11 = _sprintf($x - $sub3 + $self->{w} * 0.25);
+    my $x12 = _sprintf($x2 + $sub3 - $self->{w} * 0.25);
+    my $y1 = _sprintf($y - $sub6 + $self->{h} * 0.333);
     
-    my $xl = sprintf($form, $x + $sub3);
-    my $xr = sprintf($form, $x2 - $sub3);
+    my $xl = _sprintf($x + $sub3);
+    my $xr = _sprintf($x2 - $sub3);
 
     $shape = "polygon points=\"$x1,$y, $xr,$y1, $x12,$y2, $x11,$y2, $xl,$y1\"";
     }
   elsif ($shape eq 'invhouse')
     {
     my $x1 = $cx;
-    my $y1 = sprintf($form, $y - (1.4 * $sub) + $self->{h} * 0.666);
+    my $y1 = _sprintf($y - (1.4 * $sub) + $self->{h} * 0.666);
 
     $shape = "polygon points=\"$x,$y, $x2,$y, $x2,$y1, $x1,$y2, $x,$y1\"";
     }
@@ -724,40 +866,40 @@ sub _svg_attributes
     {
     my $x15 = $cx;
     
-    my $x11 = sprintf($form, $x2 + $sub3 - $self->{w} * 0.10);
-    my $x14 = sprintf($form, $x - $sub3 + $self->{w} * 0.10);
+    my $x11 = _sprintf($x2 + $sub3 - $self->{w} * 0.10);
+    my $x14 = _sprintf($x - $sub3 + $self->{w} * 0.10);
 
-    my $y11 = sprintf($form, $y - $sub3 + $self->{h} * 0.15);
-    my $y13 = sprintf($form, $y2 + 0.85 * $sub - $self->{h} * 0.40);
+    my $y11 = _sprintf($y - $sub3 + $self->{h} * 0.15);
+    my $y13 = _sprintf($y2 + 0.85 * $sub - $self->{h} * 0.40);
 
-    my $x12 = sprintf($form, $x2 + $sub6 - $self->{w} * 0.25);
-    my $x13 = sprintf($form, $x - $sub6 + $self->{w} * 0.25);
+    my $x12 = _sprintf($x2 + $sub6 - $self->{w} * 0.25);
+    my $x13 = _sprintf($x - $sub6 + $self->{w} * 0.25);
     
-    my $xl = sprintf($form, $x - 0.15 * $sub);
-    my $xr = sprintf($form, $x2 + 0.15 * $sub);
+    my $xl = _sprintf($x - 0.15 * $sub);
+    my $xr = _sprintf($x2 + 0.15 * $sub);
 
     $shape = "polygon points=\"$x15,$y, $x11,$y11, $xr,$y13, $x12,$y2, $x13,$y2, $xl,$y13, $x14, $y11\"";
     }
   elsif ($shape eq 'octagon')
     {
-    my $x11 = sprintf($form, $x - $sub3 + $self->{w} * 0.25);
-    my $x12 = sprintf($form, $x2 + $sub3 - $self->{w} * 0.25);
-    my $y11 = sprintf($form, $y - $sub6 + $self->{h} * 0.25);
-    my $y12 = sprintf($form, $y2 + $sub6 - $self->{h} * 0.25);
+    my $x11 = _sprintf($x - $sub3 + $self->{w} * 0.25);
+    my $x12 = _sprintf($x2 + $sub3 - $self->{w} * 0.25);
+    my $y11 = _sprintf($y - $sub6 + $self->{h} * 0.25);
+    my $y12 = _sprintf($y2 + $sub6 - $self->{h} * 0.25);
 
-    my $xl = sprintf($form, $x + $sub * 0.133);
-    my $xr = sprintf($form, $x2 - $sub * 0.133);
+    my $xl = _sprintf($x + $sub * 0.133);
+    my $xr = _sprintf($x2 - $sub * 0.133);
 
     $shape = "polygon points=\"$xl,$y11, $x11,$y, $x12,$y, $xr,$y11, $xr,$y12, $x12,$y2, $x11,$y2, $xl,$y12\"";
     }
   elsif ($shape eq 'hexagon')
     {
     my $y1 = $cy;
-    my $x11 = sprintf($form, $x - $sub6 + $self->{w} * 0.25);
-    my $x12 = sprintf($form, $x2 + $sub6 - $self->{w} * 0.25);
+    my $x11 = _sprintf($x - $sub6 + $self->{w} * 0.25);
+    my $x12 = _sprintf($x2 + $sub6 - $self->{w} * 0.25);
 
-    my $xl = sprintf($form, $x + $sub3);
-    my $xr = sprintf($form, $x2 - $sub3);
+    my $xl = _sprintf($x + $sub3);
+    my $xr = _sprintf($x2 - $sub3);
 
     $shape = "polygon points=\"$xl,$y1, $x11,$y, $x12,$y, $xr,$y1, $x12,$y2, $x11,$y2\"";
     }
@@ -765,10 +907,10 @@ sub _svg_attributes
     {
     my $x1 = $cx;
 
-    my $xl = sprintf($form, $x + $sub);
-    my $xr = sprintf($form, $x2 - $sub);
+    my $xl = _sprintf($x + $sub);
+    my $xr = _sprintf($x2 - $sub);
 
-    my $yd = sprintf($form, $y2 + ($sub * 0.2 ));
+    my $yd = _sprintf($y2 + ($sub * 0.2 ));
 
     $shape = "polygon points=\"$x1,$y, $xr,$yd, $xl,$yd\"";
     }
@@ -776,10 +918,10 @@ sub _svg_attributes
     {
     my $x1 = $cx;
 
-    my $xl = sprintf($form, $x + $sub);
-    my $xr = sprintf($form, $x2 - $sub);
+    my $xl = _sprintf($x + $sub);
+    my $xr = _sprintf($x2 - $sub);
 
-    my $yd = sprintf($form, $y - ($sub * 0.2));
+    my $yd = _sprintf($y - ($sub * 0.2));
 
     $shape = "polygon points=\"$xl,$yd, $xr,$yd, $x1,$y2\"";
     }
@@ -801,14 +943,13 @@ sub _svg_attributes
       }
     $att->{x} = $x;
     $att->{y} = $y;
-    $att->{width} = $self->{w} - $sub * 2;
-    $att->{height} = $self->{h} - $sub * 2;
+    $att->{width} = _sprintf($self->{w} - $sub * 2);
+    $att->{height} = _sprintf($self->{h} - $sub * 2);
     }
   $att->{shape} = $shape;
 
   my $border_style = $self->attribute('border-style') || 'solid';
   my $border_color = $self->attribute('border-color') || 'black';
-  my $border_width = $self->attribute('border-width') || '1';
 
   $att->{'stroke-width'} = $border_width if $border_width ne '1';
   $att->{stroke} = $border_color;
@@ -818,8 +959,7 @@ sub _svg_attributes
     $att->{'stroke-dasharray'} = $strokes->{$border_style}
      if exists $strokes->{$border_style};
     }
-
-  $att->{'stroke-width'} = 3 if $border_style eq 'bold';
+  
   if ($border_style eq 'none')
     {
     delete $att->{'stroke-width'};
@@ -869,7 +1009,7 @@ sub _svg_attributes_as_txt
  
 sub _correct_size_svg
   {
-  # Correct {w} and {h} after parsing.
+  # Correct {w} and {h} for the node after parsing.
   my $self = shift;
 
   my $em = $self->EM();		# multiplication factor chars * em = units (pixels)
@@ -884,17 +1024,18 @@ sub _correct_size_svg
     return;
     }
 
-  my ($w,$h) = $self->dimensions();
+  my ($w,$h) = $self->_svg_dimensions();
 
   # XXX TODO: that should use a changable padding factor (like "0.2 em" or "4")
-  $self->{w} = int($w * $em + 0.3 * $em);
+  $self->{w} = int($w * $em + 0.5 * $em);
   $self->{h} = int($h * $em + 0.8 * $em);
 
-  my $border = $self->attribute('border-style') || 'none';
-  $border = 'none' if $shape eq 'none';
+  my $border = 'none';
+  $border = $self->attribute('border-style') || 'none' if $shape ne 'none';
+
   if ($border ne 'none')
     {
-    my $bw = $self->attribute('border-width') || '1';
+    my $bw = Graph::Easy::_border_width_in_pixels($self,$em);
     $self->{w} += $bw * 2;
     $self->{h} += $bw * 2;
     }
@@ -916,6 +1057,11 @@ sub _correct_size_svg
 1;
 
 package Graph::Easy::Edge::Cell;
+
+BEGIN
+  {
+  *_sprintf = \&Graph::Easy::As_svg::_sprintf;
+  }
 
 #############################################################################
 #############################################################################
@@ -957,7 +1103,7 @@ my $draw_lines = {
 
 sub _svg_arrow
   {
-  my ($self, $att, $x, $y, $type, $dis, $indent) = @_;
+  my ($self, $att, $x, $y, $type, $dis, $indent, $s) = @_;
 
   my $w = $self->{w};
   my $h = $self->{h};
@@ -1000,36 +1146,41 @@ sub _svg_arrow
 
   my $svg = '';
 
+  my $scale = ''; $scale = "scale($s)" if $s; 
+
   if ($type & EDGE_END_N)
     {
-    $x1 = $x + $w / 2;		# the arrow tip
+    $x1 = _sprintf($x + $w / 2);		# the arrow tip
     $dis *= $h if $dis < 1;
-    $y1 = $y + $dis;
+    $y1 = _sprintf($y + $dis);
 
-    $svg .= $ar . "transform=\"translate($x1 $y1) rotate(-90)\"/>\n";
+    $svg .= $ar . "transform=\"translate($x1 $y1) rotate(-90)$scale\"/>\n";
     }
   if ($type & EDGE_END_S)
     {
-    $x1 = $x + $w / 2;		# the arrow tip
+    $x1 = _sprintf($x + $w / 2);		# the arrow tip
     $dis *= $h if $dis < 1;
-    $y1 = $y + $h - $dis;
+    $y1 = _sprintf($y + $h - $dis);
 
-    $svg .= $ar . "transform=\"translate($x1 $y1) rotate(90)\"/>\n";
+    $svg .= $ar . "transform=\"translate($x1 $y1) rotate(90)$scale\"/>\n";
     }
   if ($type & EDGE_END_W)
     {
     $dis *= $w if $dis < 1;
-    $x1 = $x + $dis;		# the arrow tip
-    $y1 = $y + $h / 2;
+    $x1 = _sprintf($x + $dis);			# the arrow tip
+    $y1 = _sprintf($y + $h / 2);
 
-    $svg .= $ar . "transform=\"translate($x1 $y1) rotate(180)\"/>\n";
+    $svg .= $ar . "transform=\"translate($x1 $y1) rotate(180)$scale\"/>\n";
     }
   if ($type & EDGE_END_E)
     {
     $dis *= $w if $dis < 1;
-    $x1 = $x + $w - $dis;		# the arrow tip
-    $y1 = $y + $h / 2;
-    $svg .= $ar . "x=\"$x1\" y=\"$y1\"/>\n";
+    $x1 = _sprintf($x + $w - $dis);	# the arrow tip
+    $y1 = _sprintf($y + $h / 2);
+
+    my $a = $ar . "x=\"$x1\" y=\"$y1\"/>\n";
+    $a = $ar . "transform=\"translate($x1 $y1) $scale\"/>\n" if $scale;
+    $svg .= $a;
     }
 
   $svg;
@@ -1086,6 +1237,8 @@ sub _svg_line_straight
       }
     }
 
+  ($x1,$y1,$x2,$y2) = _sprintf($x1,$y1,$x2,$y2);
+
   my @r = ( "<line x1=\"$x1\" y1=\"$y1\" x2=\"$x2\" y2=\"$y2\" $add/>" );
 
   # for a double line
@@ -1117,6 +1270,7 @@ my $dimensions = {
 
 sub _correct_size_svg
   {
+  # correct the size for the edge cell
   my ($self,$format) = @_;
 
   my $em = $self->EM();		# multiplication factor chars * em = units (pixels)
@@ -1133,9 +1287,23 @@ sub _correct_size_svg
   # make it bigger for cells with the label
   if ($self->{type} & EDGE_LABEL_CELL)
     {
-    my ($w,$h) = $self->dimensions();
-    $self->{w} += $w - 2;
+    my ($w,$h) = $self->_svg_dimensions();
+    $self->{w} += $w;
     $self->{h} += $h;
+    }
+
+  my $style = $self->{style};
+
+  # correct for bigger arrows
+  my $ac = $self->arrow_count();
+  if ($ac > 0 && $style =~ /^(broad|wide)/)
+    {
+    my $add = 1.5; $add = 2.5 if $style =~ /^wide/;
+
+    # if we have two arrows, double the additional space
+    $add *= 2 if $ac > 1;
+
+    $self->{w} += $add;
     }
 
   ($self->{w}, $self->{h}) = ($self->{w} * $em, $self->{h} * $em);
@@ -1147,7 +1315,7 @@ sub _correct_size_svg
 sub _svg_attributes
   {
   # Return a hash with attributes for the cell.
-  my ($self) = @_;
+  my ($self, $em) = @_;
 
   my $att = {};
 
@@ -1163,7 +1331,9 @@ sub _svg_attributes
      if exists $strokes->{$style};
     }
 
-  $att->{'stroke-width'} = 3 if $style eq 'bold';
+  $att->{'stroke-width'} = 3 if $style =~ /^bold/;
+  $att->{'stroke-width'} = $em / 2 if $style =~ /^broad/;
+  $att->{'stroke-width'} = $em if $style =~ /^wide/;
 
   $att->{'arrow-style'} = $self->attribute('arrow-style') || '';
   $att;
@@ -1176,7 +1346,7 @@ sub as_svg
   my $em = $self->EM();		# multiplication factor chars * em = units (pixels)
 
   # the attributes of the element we will finally output
-  my $att = $self->_svg_attributes();
+  my $att = $self->_svg_attributes($em);
  
   # set a potential title
   my $title = $self->title();
@@ -1189,8 +1359,9 @@ sub as_svg
   my $start = $self->{type} & EDGE_START_MASK();
 
   my $edge = $self->{edge};
-  my $from = $edge->{from}->{name};
-  my $to = $edge->{to}->{name};
+  my $from = Graph::Easy::As_svg::_quote_name($edge->{from}->{name});
+  my $to = Graph::Easy::As_svg::_quote_name($edge->{to}->{name});
+  
   my $svg = "$indent<!-- " . edge_type($type) . ", from $from to $to -->\n";
 
   $self->_svg_background(\$svg, $x,$y, $indent);
@@ -1212,20 +1383,25 @@ sub as_svg
     # start/end points
     my ($s,$e) = (undef,undef);
 
+    my $bw  = $self->{w} * 0.1 + ($att->{'stroke-width'} || 1) / 3;
+    my $bwe = $self->{w} * 0.1 + ($att->{'stroke-width'} || 1) / 1.8;
+    my $bh = $self->{h} * 0.1 + ($att->{'stroke-width'} || 1) / 3;
+    my $bhe = $self->{h} * 0.1 + ($att->{'stroke-width'} || 1) / 1.8;
+
     # VER: s = north, e = south, HOR: s = left, e= right
     if ($type == LINE_VER)
       {
-      $e = 0.1 if ($end & EDGE_END_S);
-      $s = 0.1 if ($end & EDGE_END_N);
-      $e = 0.1 if ($start & EDGE_START_S);
-      $s = 0.1 if ($start & EDGE_START_N);
+      $e = $bhe if ($end & EDGE_END_S);
+      $s = $bhe if ($end & EDGE_END_N);
+      $e = $bh if ($start & EDGE_START_S);
+      $s = $bh if ($start & EDGE_START_N);
       }
     else # $type == LINE_HOR
       {
-      $e = 0.1 if ($end & EDGE_END_E);
-      $s = 0.1 if ($end & EDGE_END_W);
-      $e = 0.1 if ($start & EDGE_START_E);
-      $s = 0.1 if ($start & EDGE_START_W);
+      $e = $bwe if ($end & EDGE_END_E);
+      $s = $bwe if ($end & EDGE_END_W);
+      $e = $bw if ($start & EDGE_START_E);
+      $s = $bw if ($start & EDGE_START_W);
       }
 
     # LINE_VER must come last
@@ -1257,10 +1433,20 @@ sub as_svg
 
   $svg .= $lines;
 
-  my $arrow = $self->{type} & EDGE_END_MASK;
+  my $arrow = $end;
   # depending on end points, add the arrow
+  
+  my $scale = $att->{'stroke-width'}||1; 
+  if ($scale < 4)
+    {
+    $scale = '';
+    }
+  else
+    {
+    $scale /= 4;
+    }
 
-  $svg .= $self->_svg_arrow($att, $x, $y, $arrow, 0.1, $indent) unless $arrow == 0;
+  $svg .= $self->_svg_arrow($att, $x, $y, $arrow, 0.1, $indent, $scale) unless $arrow == 0;
 
   ###########################################################################
   # include the label/name/text if we are the label cell
@@ -1271,8 +1457,27 @@ sub as_svg
 
     if ($label ne '')
       {
-      my $xt = int($x + $em * 0.2 + $self->{w} / 2);
+      my $xt = int($x + $self->{w} / 2);
       my $yt = int($y + $em + $em * 0.2);
+
+      # for HOR edges
+
+      if ($type == EDGE_HOR)
+        {
+        # if we have only one big arrow, shift the text left/right
+        my $ac = $self->arrow_count();
+        my $style = $self->{style};
+
+        if ($ac == 1)
+          {
+          my $shift = 0.2;
+          $shift = 0.5 if $style =~ /^broad/;
+          $shift = 0.8 if $style =~ /^wide/;
+          # <-- edges, shift right, otherwise left
+          $shift = -$shift if ($end & EDGE_END_E) != 0;
+          $xt = int($xt + $em * $shift);
+          }
+        }
 
       my $color = $self->attribute('label-color') || '';
 

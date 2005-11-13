@@ -5,14 +5,14 @@ Output bugs:
 
 * Node texts are moved wrongly on rotated nodes (their new
   center should rotate along with the shape)
+* wide/broad/bold edges have an hole between the line and the open
+  arrow, fill it with a triangle-shaped line-end
 * support different edge starting point styles ala:
 
   ----->  |----->  o----->  +----->  *----->  >>----->
 
 * implement border- and edge-style: wave
-* the size of a node does not only depend on the number of
-  characters, but also on their size: "iii" is shorter than
-  "WWW", unlike in ASCII
+* _text_length() could be more accurate
 * edges with style "double" have gaps on corner pieces
 * multi-line text labels and text-labels on ver edges cross into the edge line
 * implement arrow-style: none
@@ -33,6 +33,7 @@ Shorter output:
 Browser-specific woes:
 
 * Opera <9.0 does only support SVG Tiny :-( (no tspan etc)
+* Opera 9.0 does only support SVG Basic :-( (no text-center)
 * Firefox 1.5b2 gets tspan with 'x="..." dy="1em"' wrong
 * Firefox 1.5b2 seems to ignore text-decoration on <text>
 * Batik 1.5.1 has problems with 'font-size="12px"' on <text>

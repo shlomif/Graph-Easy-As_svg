@@ -1,6 +1,18 @@
 Revision history for Graph::Easy::As_svg:
 
-2005-11-06 v0.11 Tels 56 tests - Fix, fix, fix, fix the bugs...
+2005-11-13 v0.12 Tels 64 tests - Fix, fix, fix, fix the bugs...
+  * require Graph::Easy 0.33
+  * add PREREQ_FATAL to Makefile.PL
+  * support bold-dash, broad and wide edge/border styles
+  * correct node-sizes to accomodate border-width  
+  * shorten edge-pieces with labels a bit
+  * implement a crude version of _text_length(), returning the text length
+    in pixels depending on EM and the string content ("WW" vs. "ii"). This
+    stops nodes from being overly broad with lots of padding.
+  * don't generate invalid SVG on labels/node names with "--", "&", "<" or ">"
+  * limit precision on edge-lines and arrows to 2 digits (instead of 4)
+
+2005-11-06 v0.11 Tels 56 tests
   * limit precision to 2 digits (instead of 4) for coordinates
   * put common attributes on double-border shapes into a <g> to shorten output
   * indent output by ' ' instead of '  ' to shorten it a bit

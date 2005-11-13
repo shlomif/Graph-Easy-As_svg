@@ -8,6 +8,7 @@ SIGNATURE
 TODO
 examples/as_svg			parse text and output as standalone SVG
 t/svg.t				SVG output
+t/text.t			_text_length()
 t/svg/svg.txt
 t/pod.t				test POD for correctness
 t/pod_cov.t			test POD for covering all subroutines

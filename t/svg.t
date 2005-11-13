@@ -5,7 +5,7 @@ use strict;
 
 BEGIN
    {
-   plan tests => 56;
+   plan tests => 57;
    chdir 't' if -d 't';
    use lib '../lib';
    use_ok ("Graph::Easy") or die($@);
@@ -31,6 +31,7 @@ my $svg = $graph->as_svg();
 # after loading As_svg, this should work:
 can_ok ('Graph::Easy::Node', qw/as_svg/);
 can_ok ('Graph::Easy', qw/as_svg_file/);
+can_ok ('Graph::Easy::As_svg', qw/_text_length/);
 
 like ($svg, qr/enerated at .* by/, 'contains generator notice');
 like ($svg, qr/<svg/, 'looks like SVG');
