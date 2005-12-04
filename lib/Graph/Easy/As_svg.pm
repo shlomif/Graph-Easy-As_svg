@@ -8,7 +8,7 @@ package Graph::Easy::As_svg;
 
 use vars qw/$VERSION/;
 
-$VERSION = '0.12';
+$VERSION = '0.13';
 
 use strict;
 
@@ -261,7 +261,7 @@ sub text_styles_as_svg
 sub _svg_text
   { 
   # create a text via <text> at pos x,y, indented by "$indent"
-  my ($self, $label, $color, $em, $indent, $x, $y) = @_;
+  my ($self, $label, $color, $em, $indent, $x, $y, $style) = @_;
 
   $label =~ s/\s*\\n\s*/\n/g;			# insert real newlines
 
@@ -288,6 +288,7 @@ sub _svg_text
     }
 
   my $fs; $fs = $self->text_styles_as_svg() if $label ne '';
+  $fs = '' unless defined $fs;
 
   my $link = $self->link();
 
@@ -295,7 +296,9 @@ sub _svg_text
   # outline around colored text. So disable the stroke with "non".
   my $stroke = ''; $stroke = ' stroke="none"' if ref($self) =~ /Edge/;
 
-  my $svg = "$indent<text class=\"text\" x=\"$x\" y=\"$y\"$fs fill=\"$color\"$stroke>$label</text>\n";
+  $style = '' unless defined $style;
+
+  my $svg = "$indent<text class=\"text\" x=\"$x\" y=\"$y\"$fs fill=\"$color\"$stroke$style>$label</text>\n";
 
   if ($link ne '')
     {
@@ -314,6 +317,9 @@ sub _as_svg
   {
   # convert the graph to SVG
   my ($self, $options) = @_;
+
+  # set the info fields to defaults
+  $self->{svg_info} = { width => 0, height => 0 };
 
   $self->layout() unless defined $self->{score};
 
@@ -515,6 +521,10 @@ EOSVG
 
   $txt .= "\n" if $options->{standalone};
 
+  # set the info fields:
+  $self->{svg_info}->{width} = $mx; 
+  $self->{svg_info}->{height} = $my; 
+
   $txt;
   }
 
@@ -565,6 +575,13 @@ See the LICENSE file for information.
 x<tels>
 
 =cut
+
+package Graph::Easy::Node::Cell;
+
+sub as_svg
+  {
+  return '';
+  }
 
 package Graph::Easy::Node;
 
@@ -1288,6 +1305,8 @@ sub _correct_size_svg
   if ($self->{type} & EDGE_LABEL_CELL)
     {
     my ($w,$h) = $self->_svg_dimensions();
+    # for vertical edges, multiply $w * 2 and add 2 em
+    $w = $w * 2 + 2 if ($type == EDGE_VER);
     $self->{w} += $w;
     $self->{h} += $h;
     }
@@ -1460,8 +1479,9 @@ sub as_svg
       my $xt = int($x + $self->{w} / 2);
       my $yt = int($y + $em + $em * 0.2);
 
-      # for HOR edges
+      my $style = '';
 
+      # for HOR edges
       if ($type == EDGE_HOR)
         {
         # if we have only one big arrow, shift the text left/right
@@ -1478,13 +1498,22 @@ sub as_svg
           $xt = int($xt + $em * $shift);
           }
         }
+      else
+        {
+        # put label right of the edge
+        my ($w,$h) = $self->dimensions();
+        $xt = $xt + $w * $em / 2;
+        $yt += $em if $self->{type} & EDGE_START_N;
+        $yt -= $em if $self->{type} & EDGE_START_S;
+        $style = ' text-align="left"';
+        }
 
       my $color = $self->attribute('label-color') || '';
 
       # fall back to color if label-color not defined
       $color = $self->attribute('color') || 'black' if $color eq '';
 
-      $svg .= $self->_svg_text($label, $color, $em, $indent, $xt, $yt);
+      $svg .= $self->_svg_text($label, $color, $em, $indent, $xt, $yt, $style);
       }
     } 
 

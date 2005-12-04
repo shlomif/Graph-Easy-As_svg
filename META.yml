@@ -1,10 +1,10 @@
 --- #YAML:1.0
 name: Graph-Easy-As_svg
-version: 0.12
+version: 0.13
 version_from: lib/Graph/Easy/As_svg.pm
 license: gpl
 distribution_type: module
-generated_by: Graph-Easy-As_svg version 0.12
+generated_by: Graph-Easy-As_svg version 0.13
 installdirs: site
 requires:
-  Graph::Easy: 0.33
+  Graph::Easy: 0.34

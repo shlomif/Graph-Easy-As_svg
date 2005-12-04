@@ -5,7 +5,7 @@ use strict;
 
 BEGIN
    {
-   plan tests => 57;
+   plan tests => 65;
    chdir 't' if -d 't';
    use lib '../lib';
    use_ok ("Graph::Easy") or die($@);
@@ -113,6 +113,16 @@ $graph = Graph::Easy->new();
 $edge = $graph->add_edge ($bonn, $berlin);
 
 $bonn->set_attribute( 'shape' => 'circle' );
+
+is ($bonn->predecessors(), 0, 'no pre');
+is ($berlin->successors(), 0, 'no pre');
+is ($bonn->successors(), 1, 'one pre');
+is ($berlin->predecessors(), 1, 'one pre');
+
+is (keys %{$graph->{cells}}, 0, 'no cells'); 
+is ($bonn->{graph}, $graph, 'graph is ok');
+is ($berlin->{graph}, $graph, 'graph is ok');
+is ($edge->{graph}, $graph, 'graph on edge is ok');
 
 $svg = $graph->as_svg();
 
