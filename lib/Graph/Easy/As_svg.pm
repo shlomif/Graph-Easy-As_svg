@@ -8,7 +8,7 @@ package Graph::Easy::As_svg;
 
 use vars qw/$VERSION/;
 
-$VERSION = '0.13';
+$VERSION = '0.14';
 
 use strict;
 
@@ -90,6 +90,21 @@ sub _quote_name
   $out_name;
   }
 
+sub _quote
+  {
+  my $name = shift;
+
+  my $txt = $name;
+
+  # "&", ,'"', "<" and ">" will not work in href's
+  $txt =~ s/&/&amp;/g;
+  $txt =~ s/</&lt;/g;
+  $txt =~ s/>/&gt;/g;
+  $txt =~ s/"/&quot;/g;
+
+  $txt;
+  }
+
 sub _sprintf
   {
   my $form = '%0.2f';
@@ -118,6 +133,11 @@ use Graph::Easy;
 package Graph::Easy;
 
 use strict;
+
+BEGIN
+  {
+  *_quote = \&Graph::Easy::As_svg::_quote;
+  }
 
 sub EM
   {
@@ -290,7 +310,7 @@ sub _svg_text
   my $fs; $fs = $self->text_styles_as_svg() if $label ne '';
   $fs = '' unless defined $fs;
 
-  my $link = $self->link();
+  my $link = _quote($self->link());
 
   # For an edge, the default stroke is black, but this will render a black
   # outline around colored text. So disable the stroke with "non".
@@ -305,7 +325,7 @@ sub _svg_text
     # although the title is already included on the outer shape, we need to
     # add it to the link, too (for shape: none, and some user agents like
     # FF 1.5 display the title only while outside the text-area)
-    my $title = $self->title(); $title = ' xlink:title="' . $title . '"' if $title ne '';
+    my $title = _quote($self->title()); $title = ' xlink:title="' . $title . '"' if $title ne '';
     $svg = $indent . "<a xlink:href=\"$link\"$title>\n$indent" . $svg .
            $indent . "</a>\n";
     }
@@ -353,7 +373,7 @@ EOSVG
     ."\n<!-- Generated at " . scalar localtime() . " by:\n  " .
      "Graph::Easy v$Graph::Easy::VERSION\n  Graph::Easy::As_svg v$Graph::Easy::As_svg::VERSION\n -->\n\n";
 
-  my $title = $self->title();
+  my $title = _quote($self->title());
 
   $txt .= " <title>$title</title>\n" if $title ne '';
 
@@ -588,6 +608,7 @@ package Graph::Easy::Node;
 BEGIN
   {
   *_sprintf = \&Graph::Easy::As_svg::_sprintf;
+  *_quote = \&Graph::Easy::As_svg::_quote;
   }
 
 sub _svg_dimensions
@@ -653,7 +674,7 @@ sub as_svg
   return '' if $shape eq 'invisible';
 
   # set a potential title
-  my $title = $self->title();
+  my $title = _quote($self->title());
   $att->{title} = $title if $title ne '';
 
   my $s = $self->attribute('shape') || 'rectangle';
@@ -1078,6 +1099,7 @@ package Graph::Easy::Edge::Cell;
 BEGIN
   {
   *_sprintf = \&Graph::Easy::As_svg::_sprintf;
+  *_quote = \&Graph::Easy::As_svg::_quote;
   }
 
 #############################################################################
@@ -1368,7 +1390,7 @@ sub as_svg
   my $att = $self->_svg_attributes($em);
  
   # set a potential title
-  my $title = $self->title();
+  my $title = _quote($self->title());
   $att->{title} = $title if $title ne '';
 
   my $att_txt = $self->_svg_attributes_as_txt($att);
