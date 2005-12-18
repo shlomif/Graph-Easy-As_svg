@@ -1,8 +1,15 @@
 Revision history for Graph::Easy::As_svg:
 
-2005-12-10 v0.14 Tels 72 tests - Fix, fix, fix, fix the bugs...
+2005-12-18 v0.15 Tels 72 tests - Fix, fix, fix, fix the bugs...
+  * require Graph::Easy 0.36
+  * fix edge crossings with different widths (wide vs. broad etc)
+  * add rendering of edge joints
+
+2005-12-10 v0.14 Tels 72 tests
   * require Graph::Easy 0.35
   * quote "&", "<", ">" and '"' in links and titles (Thanx Mutante!)
+  * add "xlink:show" and "xlink:target" on links to open them in
+    a new window (but Firefox ignores this anyway, see mozilla bug #315389)
 
 2005-12-04 v0.13 Tels 72 tests
   * require Graph::Easy 0.34

@@ -8,7 +8,7 @@ package Graph::Easy::As_svg;
 
 use vars qw/$VERSION/;
 
-$VERSION = '0.14';
+$VERSION = '0.15';
 
 use strict;
 
@@ -92,9 +92,7 @@ sub _quote_name
 
 sub _quote
   {
-  my $name = shift;
-
-  my $txt = $name;
+  my ($txt) = @_;
 
   # "&", ,'"', "<" and ">" will not work in href's
   $txt =~ s/&/&amp;/g;
@@ -326,7 +324,7 @@ sub _svg_text
     # add it to the link, too (for shape: none, and some user agents like
     # FF 1.5 display the title only while outside the text-area)
     my $title = _quote($self->title()); $title = ' xlink:title="' . $title . '"' if $title ne '';
-    $svg = $indent . "<a xlink:href=\"$link\"$title>\n$indent" . $svg .
+    $svg = $indent . "<a xlink:target=\"_blank\" xlink:show=\"new\" xlink:href=\"$link\"$title>\n$indent" . $svg .
            $indent . "</a>\n";
     }
 
@@ -343,8 +341,8 @@ sub _as_svg
 
   $self->layout() unless defined $self->{score};
 
-  my ($rows,$cols,$max_x,$max_y,$cells) = $self->_prepare_layout('svg');
-
+  my ($rows,$cols,$max_x,$max_y) = $self->_prepare_layout('svg');
+  my $cells = $self->{cells};
   my $txt;
 
   if ($options->{standalone})
@@ -509,7 +507,7 @@ EOSVG
 #     }
 
   # now output all the occupied cells
-  foreach my $n (@$cells)
+  foreach my $n (values %$cells)
     {
     # exclude filler cells
     if ($n->{minw} != 0 && $n->{minh} != 0)
@@ -1134,6 +1132,11 @@ my $draw_lines = {
   EDGE_N_E()	=> [ LINE_VER,   0, 0.5, LINE_HOR, 0.5, 0 ],	# ,-    corner (S to E)
   EDGE_S_W()	=> [ LINE_VER,   0.5, 0, LINE_HOR, 0, 0.5 ],	# -,    corner (S to W)
 
+  EDGE_S_E_W()	=> [ LINE_HOR,   0, 0, LINE_VER, 0.5, 0 ],	# joint
+  EDGE_N_E_W()	=> [ LINE_HOR,   0, 0, LINE_VER, 0, 0.5 ],	# joint
+  EDGE_E_N_S()	=> [ LINE_HOR,   0.5, 0, LINE_VER, 0, 0 ],	# joint
+  EDGE_W_N_S()	=> [ LINE_HOR,   0, 0.5, LINE_VER, 0, 0 ],	# joint
+
   EDGE_S_E_W	=> [ LINE_HOR, 0, 0, LINE_VER, 0.5, 0 ],	# -,-   three-sided corner (S to W/E)
   EDGE_N_E_W	=> [ LINE_HOR, 0, 0, LINE_VER, 0, 0.5 ],	# -'-   three-sided corner (N to W/E)
   EDGE_E_N_S	=> [ LINE_VER, 0, 0, LINE_HOR, 0.5, 0 ],	#  |-   three-sided corner (E to S/N)
@@ -1305,6 +1308,7 @@ my $dimensions = {
   EDGE_N_E_W	=> [ 3, 3 ],	# -'-   three-sided corner (N to W/E)
   EDGE_E_N_S	=> [ 3, 3 ],	#  |-   three-sided corner (E to S/N)
   EDGE_W_N_S	=> [ 3, 3 ], 	# -|    three-sided corner (W to S/N)
+
  };
 
 sub _correct_size_svg
@@ -1416,6 +1420,8 @@ sub as_svg
   my $cross = ($self->{type} & EDGE_TYPE_MASK) == EDGE_CROSS;	# we are a cross section?
   my $add;
 
+  my $sw = $att->{'stroke-width'} || 1;
+
   my @line_tags;
   while (@$lines > 0)
     {
@@ -1424,10 +1430,25 @@ sub as_svg
     # start/end points
     my ($s,$e) = (undef,undef);
 
-    my $bw  = $self->{w} * 0.1 + ($att->{'stroke-width'} || 1) / 3;
-    my $bwe = $self->{w} * 0.1 + ($att->{'stroke-width'} || 1) / 1.8;
-    my $bh = $self->{h} * 0.1 + ($att->{'stroke-width'} || 1) / 3;
-    my $bhe = $self->{h} * 0.1 + ($att->{'stroke-width'} || 1) / 1.8;
+    # LINE_VER must come last
+    if ($cross && $type == LINE_VER)
+      {
+      $style = $self->{style_ver};
+      my $sn = 1;
+      $sn = 3 if $style =~ /^bold/;
+      $sn = $em / 2 if $style =~ /^broad/;
+      $sn = $em if $style =~ /^wide/;
+
+      $add = ' stroke="' . $self->{color_ver} . '"' if $self->{color_ver};
+      $add .= ' stroke-dasharray="' . ($strokes->{$style}||'1 0') .'"';
+      $add .= ' stroke-width="' . $sn . '"' if $sn ne $sw;
+      $add =~ s/^\s//;
+      }
+
+    my $bw  = $self->{w} * 0.1 + $sw / 3;
+    my $bwe = $self->{w} * 0.1 + $sw / 1.8;
+    my $bh  = $self->{h} * 0.1 + $sw / 3;
+    my $bhe = $self->{h} * 0.1 + $sw / 1.8;
 
     # VER: s = north, e = south, HOR: s = left, e= right
     if ($type == LINE_VER)
@@ -1445,13 +1466,6 @@ sub as_svg
       $s = $bw if ($start & EDGE_START_W);
       }
 
-    # LINE_VER must come last
-    if ($cross && $type == LINE_VER)
-      {
-      $style = $self->{style_ver};
-      $add = ' stroke="' . $self->{color_ver} . '"' if $self->{color_ver};
-      $add .= ' stroke-dasharray="' . ($strokes->{$style}||'1 0') .'"';
-      }
     $type += LINE_DOUBLE if $style =~ /^double/;
     push @line_tags, $self->_svg_line_straight($x, $y, $type, $l, $r, $s, $e, $add);
     }
