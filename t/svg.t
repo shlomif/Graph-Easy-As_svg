@@ -5,7 +5,7 @@ use strict;
 
 BEGIN
    {
-   plan tests => 65;
+   plan tests => 66;
    chdir 't' if -d 't';
    use lib '../lib';
    use_ok ("Graph::Easy") or die($@);
@@ -218,8 +218,9 @@ like ($svg, qr/<title>My Graph Title<\/title>/, 'title overrides label');
 
 $bonn->set_attribute( 'rotate' => 'right' );
 
-is ($bonn->attribute('rotate'), '90', 'rotate right is +90 degrees');
+is ($bonn->attribute('rotate'), 'right', 'rotate right is +90 degrees');
+is ($bonn->angle(), '180', 'rotate right is 90 (default) +90 == 180 degrees');
 
 $svg = $graph->as_svg();
-like ($svg, qr/rect.*transform="rotate\(90,/, 'rotate right = 90');
+like ($svg, qr/rect.*transform="rotate\(180,/, 'rotate right => 180');
 

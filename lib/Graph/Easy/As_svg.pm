@@ -1,14 +1,14 @@
 #############################################################################
 # output the a Graph::Easy as SVG (Scalable Vector Graphics)
 #
-# (c) by Tels 2004-2005.
+# (c) by Tels 2004-2006.
 #############################################################################
 
 package Graph::Easy::As_svg;
 
 use vars qw/$VERSION/;
 
-$VERSION = '0.15';
+$VERSION = '0.16';
 
 use strict;
 
@@ -110,6 +110,8 @@ sub _sprintf
   my @rc;
   for my $x (@_)
     {
+    push @rc, undef and next unless defined $x;
+
     my $y = sprintf($form, $x);
 
     # convert "10.00" to "10"
@@ -586,7 +588,7 @@ L<Graph::Easy>.
 
 =head1 AUTHOR
 
-Copyright (C) 2004 - 2005 by Tels L<http://bloodgate.com>
+Copyright (C) 2004 - 2006 by Tels L<http://bloodgate.com>
 
 See the LICENSE file for information.
 
@@ -1004,7 +1006,7 @@ sub _svg_attributes
   $att->{fill} = $self->attribute('fill') || 'white';
   delete $att->{fill} if $att->{fill} eq 'white';	# white is default
 
-  $att->{rotate} = $self->attribute('rotate') || 0;
+  $att->{rotate} = $self->angle();
   $att;
   }
 
@@ -1279,7 +1281,7 @@ sub _svg_line_straight
       }
     }
 
-  ($x1,$y1,$x2,$y2) = _sprintf($x1,$y1,$x2,$y2);
+  ($x1,$y1,$x2,$y2,$x3,$y3,$x4,$y4) = _sprintf($x1,$y1,$x2,$y2,$x3,$y3,$x4,$y4);
 
   my @r = ( "<line x1=\"$x1\" y1=\"$y1\" x2=\"$x2\" y2=\"$y2\" $add/>" );
 

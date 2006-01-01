@@ -5,6 +5,7 @@ Output bugs:
 
 * Node texts are moved wrongly on rotated nodes (their new
   center should rotate along with the shape)
+* rotated node do not increase the graph size, so corners might get cut off
 * wide/broad/bold edges have an hole between the line and the open
   arrow, fill it with a triangle-shaped line-end
 * support different edge starting point styles ala:

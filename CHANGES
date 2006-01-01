@@ -1,6 +1,11 @@
 Revision history for Graph::Easy::As_svg:
 
-2005-12-18 v0.15 Tels 72 tests - Fix, fix, fix, fix the bugs...
+2006-01-01 v0.16 Tels 72 tests - Fix, fix, fix, fix the bugs...
+  * require Graph::Easy 0.38
+  * use $self->angle() to get the correct shape rotation
+  * forgot to limit precision on some edge-line coordinates
+
+2005-12-18 v0.15 Tels 72 tests
   * require Graph::Easy 0.36
   * fix edge crossings with different widths (wide vs. broad etc)
   * add rendering of edge joints
