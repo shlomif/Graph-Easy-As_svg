@@ -14,3 +14,15 @@ t/pod.t				test POD for correctness
 t/pod_cov.t			test POD for covering all subroutines
 lib/Graph/Easy/As_svg.pm	generate SVG output
 META.yml			Module meta-data (added by MakeMaker)
+
+inc/Module/AutoInstall.pm
+inc/Module/Install.pm
+inc/Module/Install/AutoInstall.pm
+inc/Module/Install/Base.pm
+inc/Module/Install/Can.pm
+inc/Module/Install/Fetch.pm
+inc/Module/Install/Include.pm
+inc/Module/Install/Makefile.pm
+inc/Module/Install/Metadata.pm
+inc/Module/Install/Win32.pm
+inc/Module/Install/WriteAll.pm

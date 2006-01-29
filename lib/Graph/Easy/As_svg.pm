@@ -8,7 +8,7 @@ package Graph::Easy::As_svg;
 
 use vars qw/$VERSION/;
 
-$VERSION = '0.16';
+$VERSION = '0.17';
 
 use strict;
 
@@ -150,79 +150,79 @@ sub EM
 
 my $devs = {
   'ah' => 
-     "  <!-- open arrow head -->\n  <g id="
+     " <!-- open arrow head -->\n <g id="
    . '"ah" stroke-linecap="round" stroke-width="1">' . "\n"
-   . '   <line x1="-8" y1="-4" x2="1" y2="0" />'. "\n"
-   . '   <line x1="1" y1="0" x2="-8" y2="4" />'. "\n"
-   . "  </g>\n",
+   . '  <line x1="-8" y1="-4" x2="1" y2="0" />'. "\n"
+   . '  <line x1="1" y1="0" x2="-8" y2="4" />'. "\n"
+   . " </g>\n",
 
   'ahc' => 
-     "  <!-- closed arrow head -->\n  <g id="
+     " <!-- closed arrow head -->\n <g id="
    . '"ahc" stroke-linecap="round" stroke-width="1">' . "\n"
-   . '   <polygon points="-8,-4, 1,0, -8,4"/>'. "\n"
-   . "  </g>\n",
+   . '  <polygon points="-8,-4, 1,0, -8,4"/>'. "\n"
+   . " </g>\n",
 
   'ahf' => 
-     "  <!-- filled arrow head -->\n  <g id="
+     " <!-- filled arrow head -->\n <g id="
    . '"ahf" stroke-linecap="round" stroke-width="1">' . "\n"
-   . '   <polygon points="-8,-4, 1,0, -8,4"/>'. "\n"
-   . "  </g>\n",
+   . '  <polygon points="-8,-4, 1,0, -8,4"/>'. "\n"
+   . " </g>\n",
 
   # point-styles
   'diamond' =>
-     "  <g id="
+     " <g id="
    . '"diamond" stroke-linecap="round">' . "\n"
-   . '   <polygon points="0,-6, 6,0, 0,6, -6,0"/>'. "\n"
-   . "  </g>\n",
+   . '  <polygon points="0,-6, 6,0, 0,6, -6,0"/>'. "\n"
+   . " </g>\n",
   'circle' =>
-     "  <g id="
+     " <g id="
    . '"circle">' . "\n"
-   . '   <circle r="6" />'. "\n"
-   . "  </g>\n",
+   . '  <circle r="6" />'. "\n"
+   . " </g>\n",
   'star' =>
-     "  <g id="
+     " <g id="
    . '"star" stroke-linecap="round">' . "\n"
-   . '   <line x1="0" y1="-5" x2="0" y2="5" />'. "\n"
-   . '   <line x1="-5" y1="0" x2="5" y2="0" />'. "\n"
-   . '   <line x1="-3" y1="-3" x2="3" y2="3" />'. "\n"
-   . '   <line x1="-3" y1="3" x2="3" y2="-3" />'. "\n"
-   . "  </g>\n",
+   . '  <line x1="0" y1="-5" x2="0" y2="5" />'. "\n"
+   . '  <line x1="-5" y1="0" x2="5" y2="0" />'. "\n"
+   . '  <line x1="-3" y1="-3" x2="3" y2="3" />'. "\n"
+   . '  <line x1="-3" y1="3" x2="3" y2="-3" />'. "\n"
+   . " </g>\n",
   'square' =>
-     "  <g id="
+     " <g id="
    . '"square">' . "\n"
-   . '   <rect width="10" height="10" />'. "\n"
-   . "  </g>\n",
+   . '  <rect width="10" height="10" />'. "\n"
+   . " </g>\n",
   'dot' =>
-     "  <g id="
+     " <g id="
    . '"dot">' . "\n"
-   . '   <circle r="1" />'. "\n"
-   . "  </g>\n",
+   . '  <circle r="1" />'. "\n"
+   . " </g>\n",
   'cross' =>
-     "  <g id="
+     " <g id="
    . '"cross" stroke-linecap="round">' . "\n"
-   . '   <line x1="0" y1="-5" x2="0" y2="5" />'. "\n"
-   . '   <line x1="-5" y1="0" x2="5" y2="0" />'. "\n"
-   . "  </g>\n",
+   . '  <line x1="0" y1="-5" x2="0" y2="5" />'. "\n"
+   . '  <line x1="-5" y1="0" x2="5" y2="0" />'. "\n"
+   . " </g>\n",
 
   # point-styles with double border
   'd-diamond' =>
-     "  <g id="
+     " <g id="
    . '"d-diamond" stroke-linecap="round">' . "\n"
-   . '   <polygon points="0,-6, 6,0, 0,6, -6,0"/>'. "\n"
-   . '   <polygon points="0,-3, 3,0, 0,3, -3,0"/>'. "\n"
-   . "  </g>\n",
+   . '  <polygon points="0,-6, 6,0, 0,6, -6,0"/>'. "\n"
+   . '  <polygon points="0,-3, 3,0, 0,3, -3,0"/>'. "\n"
+   . " </g>\n",
   'd-circle' =>
-     "  <g id="
+     " <g id="
    . '"d-circle">' . "\n"
-   . '   <circle r="6" />'. "\n"
-   . '   <circle r="3" />'. "\n"
-   . "  </g>\n",
+   . '  <circle r="6" />'. "\n"
+   . '  <circle r="3" />'. "\n"
+   . " </g>\n",
   'd-square' =>
-     "  <g id="
+     " <g id="
    . '"d-square">' . "\n"
-   . '   <rect width="10" height="10" />'. "\n"
-   . '   <rect width="6" height="6" transform="translate(2,2)" />'. "\n"
-   . "  </g>\n",
+   . '  <rect width="10" height="10" />'. "\n"
+   . '  <rect width="6" height="6" transform="translate(2,2)" />'. "\n"
+   . " </g>\n",
   };
 
 my $strokes = {
@@ -320,16 +320,6 @@ sub _svg_text
 
   my $svg = "$indent<text class=\"text\" x=\"$x\" y=\"$y\"$fs fill=\"$color\"$stroke$style>$label</text>\n";
 
-  if ($link ne '')
-    {
-    # although the title is already included on the outer shape, we need to
-    # add it to the link, too (for shape: none, and some user agents like
-    # FF 1.5 display the title only while outside the text-area)
-    my $title = _quote($self->title()); $title = ' xlink:title="' . $title . '"' if $title ne '';
-    $svg = $indent . "<a xlink:target=\"_blank\" xlink:show=\"new\" xlink:href=\"$link\"$title>\n$indent" . $svg .
-           $indent . "</a>\n";
-    }
-
   $svg . "\n"
   }
 
@@ -371,13 +361,13 @@ EOSVG
 #     '<svg viewBox="0 0 ##MX## ##MY##" width="##MX##" height="##MY##" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">'
      '<svg width="##MX##" height="##MY##" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">'
     ."\n<!-- Generated at " . scalar localtime() . " by:\n  " .
-     "Graph::Easy v$Graph::Easy::VERSION\n  Graph::Easy::As_svg v$Graph::Easy::As_svg::VERSION\n -->\n\n";
+     "Graph::Easy v$Graph::Easy::VERSION\n  Graph::Easy::As_svg v$Graph::Easy::As_svg::VERSION\n-->\n\n";
 
   my $title = _quote($self->title());
 
-  $txt .= " <title>$title</title>\n" if $title ne '';
+  $txt .= "<title>$title</title>\n" if $title ne '';
 
-  $txt .= " <defs>\n##devs##";
+  $txt .= "<defs>\n##devs##";
 
   # clear used definitions
   $self->{_svg_defs} = {};
@@ -423,7 +413,7 @@ EOSVG
     },
   };
   # generate the class attributes first
-  my $style = $self->_class_styles( $skip, $mutator, '', '  ', $overlay);
+  my $style = $self->_class_styles( $skip, $mutator, '', ' ', $overlay);
 
   ## output groups first, with their nodes
   #foreach my $gn (sort keys %{$self->{groups}})
@@ -434,14 +424,14 @@ EOSVG
   #  }
 
   $txt .= 
-    "\n  <!-- class definitions -->\n"
-   ."  <style type=\"text/css\"><![CDATA[\n$style  "
+    "\n <!-- class definitions -->\n"
+   ." <style type=\"text/css\"><![CDATA[\n$style "
    # include a pseudo-class ".text" to shorten output
-   .".text {\n   text-anchor: middle;\n   font-size: 14;\n  }\n"
-   ."  ]]></style>\n"
+   .".text {\n  text-anchor: middle;\n  font-size: 14;\n }\n"
+   ." ]]></style>\n"
     if $style ne '';
  
-  $txt .=" </defs>\n\n";
+  $txt .="</defs>\n\n";
 
   ###########################################################################
   # prepare graph label output
@@ -490,9 +480,16 @@ EOSVG
     {
     my $y = $yl + $em; $y = $my - 2 * $em if $lp eq 'bottom';
 
-    $txt .= "<!-- graph label -->\n" .
+    # also include a link on the label if nec.
+    my $link = $self->link();
+
+    my $l = "  <!-- graph label -->\n" .
             Graph::Easy::Node::_svg_text($self, $label,
-		$self->attribute('color') || 'black', $em, '', $mx / 2, $y);
+		$self->attribute('color') || 'black', $em, '  ', $mx / 2, $y);
+
+    $l = Graph::Easy::Node::_link($self, $l, '', $title, $link) if $link ne '';
+
+    $txt .= $l;
 
     # push content down if label is at top
     $yl += $em * 2 if $lp eq 'top';
@@ -598,12 +595,16 @@ x<tels>
 
 package Graph::Easy::Node::Cell;
 
+use vars qw/$VERSION/; $VERSION = '0.01';
+
 sub as_svg
   {
   return '';
   }
 
 package Graph::Easy::Node;
+
+use vars qw/$VERSION/; $VERSION = '0.01';
 
 BEGIN
   {
@@ -677,10 +678,15 @@ sub as_svg
   my $title = _quote($self->title());
   $att->{title} = $title if $title ne '';
 
-  my $s = $self->attribute('shape') || 'rectangle';
+  my $s = $self->attribute('shape') || 'rect';
+
+  my $link = $self->link();
+  my $old_indent = $indent; $indent = $indent x 2 if $link ne '';
 
   my $out_name = Graph::Easy::As_svg::_quote_name($name);
   my $svg = "$indent<!-- $out_name, $s -->\n";
+
+  $indent .= $old_indent if $link ne '';
 
   # render the background, except for "rect" where it is not visible
   $self->_svg_background(\$svg, $x,$y, $indent) if $shape ne 'rect';
@@ -714,6 +720,24 @@ sub as_svg
     $self->{graph}->_svg_use_def($s);
 
     $svg .= "$indent<use$att_txt xlink:href=\"#$s\" x=\"$xt\" y=\"$yt\"/>\n\n";
+    }
+  elsif ($shape eq 'img')
+    {
+    require Image::Info;
+
+    my $label = $self->label();
+    my $info = Image::Info::image_info($label);
+    my $w = $info->{width};
+    my $h = $info->{height};
+    if ($info->{error})
+      {
+      $self->_croak("Couldn't determine image dimensions from '$label': $info->{error}");
+      }
+    # center the image
+    my $x1 = $xt - $w / 2;
+    my $y1 = $yt - $h / 2;
+
+    $svg .= "<image x=\"$x1\" y=\"$y1\" xlink:href=\"$label\" width=\"$w\" height=\"$h\" />\n";
     }
   else
     {
@@ -782,6 +806,34 @@ sub as_svg
 
     $svg .= $self->_svg_text($label, $color, $em, $indent, $xt, $yt);
     }
+
+  # Create the link
+  $svg = $self->_link($svg, $old_indent, $title, $link) if $link ne '';
+
+  $svg;
+  }
+
+sub _link
+  {
+  # put a link around a shape (including onclick handler to work around bugs)
+  my ($self, $svg, $indent, $title, $link) = @_;
+
+  # although the title is already included on the outer shape, we need to
+  # add it to the link, too (for shape: none, and some user agents like
+  # FF 1.5 display the title only while outside the text-area)
+  $title = ' xlink:title="' . $title . '"' if $title ne '';
+
+  # Bug in Firefox 1.5, it will open the link inside the SVG frame. Force it
+  # to replace the window just like when you click an image.
+  my $onclick = ' onclick="top.location.href=\'' . $link . "'\"";
+
+  my $indent2 = $indent x 2; $indent2 = ' ' if $indent eq '';
+
+  $svg =~ s/\n\z//;
+  $svg = $indent . "<g$onclick>\n" . 
+         $indent2 . "<a xlink:target=\"_blank\" xlink:show=\"new\" xlink:href=\"$link\"$title>\n$indent" . $svg .
+         $indent2 . "</a>\n" .
+         $indent . "</g>\n\n";
 
   $svg;
   }
@@ -1095,6 +1147,8 @@ sub _correct_size_svg
 1;
 
 package Graph::Easy::Edge::Cell;
+
+use vars qw/$VERSION/; $VERSION = '0.01';
 
 BEGIN
   {

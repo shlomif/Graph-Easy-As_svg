@@ -35,7 +35,8 @@ Browser-specific woes:
 
 * Opera 8.5 does only support SVG Tiny :-( (no tspan etc)
 * Opera 9.0 does only support SVG Basic :-( (no text-center)
-* Firefox 1.5b2 gets tspan with 'x="..." dy="1em"' wrong
-* Firefox 1.5b2 seems to ignore text-decoration on <text>
+* Firefox 1.5 gets tspan with 'x="..." dy="1em"' wrong
+* Firefox 1.5 seems to ignore text-decoration on <text>
 * Firefox 1.5 opens links inside the SVG object tag space
+  (we work around that with an onclick-handler)
 * Batik 1.5.1 has problems with 'font-size="12px"' on <text>

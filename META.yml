@@ -1,10 +1,17 @@
---- #YAML:1.0
-name: Graph-Easy-As_svg
-version: 0.16
-version_from: lib/Graph/Easy/As_svg.pm
-license: gpl
+abstract: Output a Graph::Easy as Scalable Vector Graphics (SVG)
+author: 'Copyright (C) 2004 - 2006 by Tels L<http://bloodgate.com>'
+build_requires:
+  Test::More: 0.42
 distribution_type: module
-generated_by: Graph-Easy-As_svg version 0.16
-installdirs: site
+generated_by: Module::Install version 0.55
+license: gpl
+name: Graph-Easy-As_svg
+no_index:
+  directory:
+    - examples
+    - inc
+    - t
 requires:
-  Graph::Easy: 0.38
+  Graph::Easy: 0.4
+  Image::Info: 1.17
+version: 0.17
