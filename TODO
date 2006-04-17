@@ -6,30 +6,22 @@ Output bugs:
 * Node texts are moved wrongly on rotated nodes (their new
   center should rotate along with the shape)
 * rotated node do not increase the graph size, so corners might get cut off
-* wide/broad/bold edges have an hole between the line and the open
-  arrow, fill it with a triangle-shaped line-end
+* implement border- and edge-style: wave
+* _text_length() could be more accurate
+* edges with style "double" have wrong corner pieces
+* wide and broad self-loops are too small and the line must be moved
+* multi-line text labels and text-labels on ver edges cross into the edge line
 * support different edge starting point styles ala:
 
   ----->  |----->  o----->  +----->  *----->  >>----->
-
-* implement border- and edge-style: wave
-* _text_length() could be more accurate
-* edges with style "double" have gaps on corner pieces
-* multi-line text labels and text-labels on ver edges cross into the edge line
-* implement arrow-style: none
-* implement border drawing for Graph::Easy::Group::Cell
 
 Shorter output:
 
 * instead of rendering individual edge cells, we should create
   one path, this would allow better rendering of non-solid
   edges, like dashed or dotted ones
-* different parts of one edge are scattered around the output,
-  these should be output one after one at the same time
-* sorting output groups on class, and then combining them would
-  shorten the output considerable
-* output all cell backgrounds first (to avoid overlap of content and also
-  so that we can combine them to bigger rectangles if possible)
+* put the stroke-width and stroke on the <g class="edge"> instead on
+  each <line>
 
 Browser-specific woes:
 

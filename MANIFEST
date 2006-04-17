@@ -8,6 +8,7 @@ SIGNATURE
 TODO
 examples/as_svg			parse text and output as standalone SVG
 t/svg.t				SVG output
+t/group.t			SVG output for groups (subgraphs/clusters)
 t/text.t			_text_length()
 t/svg/svg.txt
 t/pod.t				test POD for correctness

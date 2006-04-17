@@ -1,11 +1,14 @@
 #!/usr/bin/perl -w
 
+# test the text_ength() function
+
 use Test::More;
 use strict;
+use utf8;
 
 BEGIN
    {
-   plan tests => 5;
+   plan tests => 7;
    chdir 't' if -d 't';
    use lib '../lib';
    use_ok ("Graph::Easy") or die($@);
@@ -18,6 +21,8 @@ my $l = 'Graph::Easy::As_svg::_text_length';
 
 no strict 'refs';
 
-is ($l->(14, 'ABCDE'), 3.5, 'ABCDE is 3.5 long');
+is ($l->(14, 'ABCDE'), 3.6, 'ABCDE is 3.6 long');
 is ($l->(14, 'WW'), 0.9*2, 'WW');
 is ($l->(14, 'ii'), 0.33*2, 'ii');
+is ($l->(14, '@@'), 1.15*2, '@@');
+is ($l->(14, 'ææ'), 1.25*2, 'ææ');

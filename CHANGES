@@ -1,6 +1,37 @@
 Revision history for Graph::Easy::As_svg:
 
-2006-01-29 v0.17 Tels 73 tests - Fix, fix, fix, fix the bugs...
+2006-04-17 v0.18 Tels 87 tests - Fix, fix, fix, fix the bugs...
+  * require Graph::Easy 0.44
+  * require Image::Info 1.20
+  * don't output empty <text...></text> tags
+  * _svg_background() returns SVG code instead of modifying $$svg
+  * don't draw borders on Group::Cells
+  * fix background color for edges and invisible nodes inside groups
+  * fix alignment for labels
+  * size-correction for overly big arrows now also works for vertical edges
+  * close the hole in open arrows on bold/broad/wide edges
+  * edge corners no longer have holes
+  * close the gaps on edges with style double
+  * fix the fontsize (was missing a "px") and also use 16 as the base vs. 14
+    This makes the text independed from the user setting in the browser, and
+    also increases it to be more readable. 
+  * always include the fill, to help renderers that can't cope with CSS styles
+  * fix rendering of multiline labels:
+    + lineheight is 18px vs 1em to not have the lines drawn together
+    + no longer contain a spurious empty last <tspan>-pair
+  * reorder output order of elements: first groups, then nodes, then edges
+  * correct the displacement on edge end/start points for wide/broad/bold edges
+  * render selfloops with paths
+  * don't render invisible edges
+  * a set background on edge cells did have a stray border
+  * edge labels have a 80% font-size as default
+  * only add 0.5EM (currently 8 pixels) as padding around the graph (was 14)
+  * add a few characters to make the _text_length() calculation more accurate
+  * a Node::Empty should not be rendered
+  * font is really font-family in CSS section
+  * support point-shaped nodes with point-style: invisible
+
+2006-01-29 v0.17 Tels 73 tests
   * use Module::Install (and bundle it)
   * require Graph::Easy 0.40
   * require Image::Info 1.17 (for nodes with "shape: img")

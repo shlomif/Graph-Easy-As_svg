@@ -5,7 +5,7 @@ use strict;
 
 BEGIN
    {
-   plan tests => 66;
+   plan tests => 69;
    chdir 't' if -d 't';
    use lib '../lib';
    use_ok ("Graph::Easy") or die($@);
@@ -96,14 +96,14 @@ is ($svg, '<line x1="50" y1="5" x2="50" y2="45" />', 'line ver');
 #############################################################################
 # arrorw drawing
 
-$svg = $cell->_svg_arrow({}, 0, 0, EDGE_END_E,    0.1 , '' );
+$svg = $cell->_svg_arrow({}, 0, 0, EDGE_END_E, , '' );
 is ($svg, '<use xlink:href="#ah" x="90" y="25"/>'."\n", 'arrowhead east');
 
-$svg = $cell->_svg_arrow({}, 0, 0, EDGE_END_N,    0.1 , '' );
-is ($svg, '<use xlink:href="#ah" transform="translate(50 5) rotate(-90)"/>'."\n", 'arrowhead north');
+$svg = $cell->_svg_arrow({}, 0, 0, EDGE_END_N, , '' );
+is ($svg, '<use xlink:href="#ah" transform="translate(50 5)rotate(-90)"/>'."\n", 'arrowhead north');
 
-$svg = $cell->_svg_arrow({}, 0, 0, EDGE_END_S,    0.1 , '' );
-is ($svg, '<use xlink:href="#ah" transform="translate(50 45) rotate(90)"/>'."\n", 'arrowhead south');
+$svg = $cell->_svg_arrow({}, 0, 0, EDGE_END_S, , '' );
+is ($svg, '<use xlink:href="#ah" transform="translate(50 45)rotate(90)"/>'."\n", 'arrowhead south');
 
 #############################################################################
 # with some nodes with attributes
@@ -196,7 +196,8 @@ like ($svg, qr/font-weight="bold" text-decoration="underline overline"/, 'text-s
 $edge->set_attribute('font-size', '2em');
 
 $svg = $graph->as_svg();
-like ($svg, qr/style="font-size:28px"/, '2em == 28 px');
+my $expect = $graph->EM() * 2;
+like ($svg, qr/style="font-size:${expect}px"/, '2em');
 
 #############################################################################
 # <title>
@@ -222,5 +223,22 @@ is ($bonn->attribute('rotate'), 'right', 'rotate right is +90 degrees');
 is ($bonn->angle(), '180', 'rotate right is 90 (default) +90 == 180 degrees');
 
 $svg = $graph->as_svg();
-like ($svg, qr/rect.*transform="rotate\(180,/, 'rotate right => 180');
+like ($svg, qr/transform="rotate\(180,/, 'rotate right => 180');
+
+#############################################################################
+
+$bonn->set_attribute( 'label' => 'My\nMultiline' );
+
+$svg = $graph->as_svg();
+unlike ($svg, qr/<tspan[^>]+><\/tspan>/, 'no empty tspan');
+
+#############################################################################
+
+$bonn->set_attribute( 'label' => 'dontseeme' );
+$bonn->set_attribute( 'shape' => 'point');
+$bonn->set_attribute( 'point-style' => 'invisible');
+
+$svg = $graph->as_svg();
+like ($svg, qr/<!-- dontseeme/, 'invisible');
+unlike ($svg, qr/invisible/, 'no "invisible" in svg');
 
