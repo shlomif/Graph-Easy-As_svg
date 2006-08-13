@@ -52,6 +52,6 @@ like ($svg, qr/Wismut/, 'contains Wismut');
 like ($svg, qr/Berlin/, 'contains Berlin');
 unlike ($svg, qr/Rostock<\/text/, "doesn't contains invisible Rostock");
 
-like ($svg, qr/<line x1=".*stroke-dasharray="4, 2/, 'contains some line');
+like ($svg, qr/<line x1=".*stroke-dasharray="6,\s*2/, 'contains some line');
 like ($svg, qr/<rect .*stroke="none"/, 'contains a rect with no stroke for edge backgrounds');
 

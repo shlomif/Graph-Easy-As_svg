@@ -1,6 +1,21 @@
 Revision history for Graph::Easy::As_svg:
 
-2006-04-17 v0.18 Tels 87 tests - Fix, fix, fix, fix the bugs...
+2006-08-13 v0.19 Tels 89 tests - Fix, fix, fix, fix the bugs...
+  * single-line labels were not properly quoted (for "<>&)
+  * add encoding="UTF-8" to XML header to make encoding explicit
+  * require Graph::Easy 0.46
+  * require Image::Info 1.22
+  * add a Build.PL file
+  * add support for color schemes
+  * fix for very wide borders:
+    + make dash:dot ratio 3:1 vs. 2:1
+    + don't include "stroke-linecap: round" for diamon shapes
+    + scale the dasharray according to stroke-width
+  * remove the workaround for Firefox bug with links:
+    + it works now in the latest Firefox, so upgrade!
+    + In the newest Firefox, it spawned a second new window
+
+2006-04-17 v0.18 Tels 87 tests
   * require Graph::Easy 0.44
   * require Image::Info 1.20
   * don't output empty <text...></text> tags

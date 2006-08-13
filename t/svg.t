@@ -5,7 +5,7 @@ use strict;
 
 BEGIN
    {
-   plan tests => 69;
+   plan tests => 71;
    chdir 't' if -d 't';
    use lib '../lib';
    use_ok ("Graph::Easy") or die($@);
@@ -241,4 +241,15 @@ $bonn->set_attribute( 'point-style' => 'invisible');
 $svg = $graph->as_svg();
 like ($svg, qr/<!-- dontseeme/, 'invisible');
 unlike ($svg, qr/invisible/, 'no "invisible" in svg');
+
+#############################################################################
+
+$bonn->set_attribute( 'label' => 'quote & < > "' );
+$bonn->set_attribute( 'shape' => 'rect');
+$bonn->del_attribute( 'point-style');
+
+$svg = $graph->as_svg();
+like ($svg, qr/<!-- quote &amp; &lt; &gt; ",/, 'quoted');
+like ($svg, qr/>quote &amp; &lt; &gt; &quot;<\/text>/, 'quoted');
+
 

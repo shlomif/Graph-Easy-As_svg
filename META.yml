@@ -1,17 +1,17 @@
 abstract: Output a Graph::Easy as Scalable Vector Graphics (SVG)
-author: 'Copyright (C) 2004 - 2006 by Tels L<http://bloodgate.com>'
-build_requires:
+author: Copyright (C) 2004 - 2006 by Tels L<http://bloodgate.com>
+build_requires: 
   Test::More: 0.42
 distribution_type: module
-generated_by: Module::Install version 0.61
+generated_by: Module::Install version 0.63
 license: gpl
 name: Graph-Easy-As_svg
-no_index:
-  directory:
+no_index: 
+  directory: 
     - examples
     - inc
     - t
-requires:
-  Graph::Easy: 0.44
-  Image::Info: 1.2
-version: 0.18
+requires: 
+  Graph::Easy: 0.46
+  Image::Info: 1.22
+version: 0.19

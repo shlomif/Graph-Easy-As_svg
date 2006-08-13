@@ -8,14 +8,14 @@ package Graph::Easy::As_svg;
 
 use vars qw/$VERSION/;
 
-$VERSION = '0.18';
+$VERSION = '0.19';
 
 use strict;
 use utf8;
 
 sub _text_length
   {
-  # Take a string, and return it's length, based on the fontsize and the
+  # Take a string, and return it's length, based on the font-size and the
   # contents ("iii" is shorter than "WWW")
   my ($em, $text) = @_;
 
@@ -101,7 +101,7 @@ sub _quote
   {
   my ($txt) = @_;
 
-  # "&", ,'"', "<" and ">" will not work in href's
+  # "&", ,'"', "<" and ">" will not work in hrefs or texts
   $txt =~ s/&/&amp;/g;
   $txt =~ s/</&lt;/g;
   $txt =~ s/>/&gt;/g;
@@ -142,6 +142,7 @@ use strict;
 BEGIN
   {
   *_quote = \&Graph::Easy::As_svg::_quote;
+  *_svg_attributes_as_txt = \&Graph::Easy::Node::_svg_attributes_as_txt;
   }
 
 sub EM
@@ -194,7 +195,7 @@ my $devs = {
   # point-styles
   'diamond' =>
      " <g id="
-   . '"diamond" stroke-linecap="round">' . "\n"
+   . '"diamond">' . "\n"
    . '  <polygon points="0,-6, 6,0, 0,6, -6,0"/>'. "\n"
    . " </g>\n",
   'circle' =>
@@ -204,7 +205,7 @@ my $devs = {
    . " </g>\n",
   'star' =>
      " <g id="
-   . '"star" stroke-linecap="round">' . "\n"
+   . '"star">' . "\n"
    . '  <line x1="0" y1="-5" x2="0" y2="5" />'. "\n"
    . '  <line x1="-5" y1="0" x2="5" y2="0" />'. "\n"
    . '  <line x1="-3" y1="-3" x2="3" y2="3" />'. "\n"
@@ -222,7 +223,7 @@ my $devs = {
    . " </g>\n",
   'cross' =>
      " <g id="
-   . '"cross" stroke-linecap="round">' . "\n"
+   . '"cross">' . "\n"
    . '  <line x1="0" y1="-5" x2="0" y2="5" />'. "\n"
    . '  <line x1="-5" y1="0" x2="5" y2="0" />'. "\n"
    . " </g>\n",
@@ -230,7 +231,7 @@ my $devs = {
   # point-styles with double border
   'd-diamond' =>
      " <g id="
-   . '"d-diamond" stroke-linecap="round">' . "\n"
+   . '"d-diamond">' . "\n"
    . '  <polygon points="0,-6, 6,0, 0,6, -6,0"/>'. "\n"
    . '  <polygon points="0,-3, 3,0, 0,3, -3,0"/>'. "\n"
    . " </g>\n",
@@ -249,12 +250,12 @@ my $devs = {
   };
 
 my $strokes = {
-  'dashed' => '4, 2',
-  'dotted' => '2, 2',
-  'dot-dash' => '2, 2, 4, 2',
-  'dot-dot-dash' => '2, 2, 2, 2, 4, 2',
-  'double-dash' => '4, 2',
-  'bold-dash' => '4, 2',
+  'dashed' => '3, 1',
+  'dotted' => '1, 1',
+  'dot-dash' => '1, 1, 3, 1',
+  'dot-dot-dash' => '1, 1, 1, 1, 3, 1',
+  'double-dash' => '3, 1',
+  'bold-dash' => '3, 1',
   };
 
 sub _svg_use_def
@@ -329,11 +330,8 @@ sub _svg_text
     my $i = 0;
     for my $line (@$lines)
       {
-      # quote "<" and ">", "&" and also '"' 
-      $line =~ s/&/&amp;/g;
-      $line =~ s/>/&gt;/g;
-      $line =~ s/</&lt;/g;
-      $line =~ s/"/&quot;/g;
+      # quote "<" and ">", "&" and also '"'
+      $line = _quote($line); 
       my $al = ' style="' . $al_map->{$aligns->[$i]} . '"'; $al = '' if $aligns->[$i] eq substr($align,0,1);
       my $join = "</tspan$al>"; $join .= "\n$in<tspan x=\"$x\" y=\"$dy\">" if $i < @$lines - 1;
       $dy += $lh;
@@ -344,7 +342,7 @@ sub _svg_text
     }
   else
     {
-    $label = $lines->[0];
+    $label = _quote($lines->[0]);
     }
 
   my $fs; $fs = $self->text_styles_as_svg() if $label ne '';
@@ -384,7 +382,34 @@ sub _remap_font_size
   # "16" to "16px"
   $val .= 'px' if $val =~ /^\d+\z/;
 
+  if ($val =~ /em\z/)
+    {
+    $val = $self->_font_size_in_pixels( 16, $val ) . 'px';
+    }
+
   ($att, $val);
+  }
+
+sub _adjust_dasharray
+  {
+  # If the border is bigger than 1px, we need to adjust the dasharray to
+  # match it.
+  my ($self,$att) = @_;
+
+  return unless exists $att->{'stroke-dasharray'}; 
+
+  my $s = $att->{'stroke-width'} || 1;
+
+  # for very thin line, make it a bit bigger as to be actually visible
+  $s = 2 if $s < 2;
+
+  my @dashes = split /\s*,\s*/, $att->{'stroke-dasharray'};
+  for my $d (@dashes)
+    { 
+    $d *= $s;	# modify in place
+    }
+  $att->{'stroke-dasharray'} = join (',', @dashes);
+  $att;
   }
 
 sub _as_svg
@@ -404,7 +429,7 @@ sub _as_svg
   if ($options->{standalone})
     {
     $txt .= <<EOSVG
-<?xml version="1.0" standalone="yes"?>
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
 
 EOSVG
@@ -452,6 +477,7 @@ EOSVG
    border-width|
    border|
    color|
+   colorscheme|
    cols|
    font-family|
    label|
@@ -476,6 +502,11 @@ EOSVG
   my $overlay = {
     edge => {
       "stroke" => 'black',
+      "text-anchor" => 'middle',
+      "font-size" => '13px',
+    },
+    node => {
+      "font-size" => '16px',
     },
   };
   # generate the class attributes first
@@ -491,10 +522,7 @@ EOSVG
 
   $txt .= 
     "\n <!-- class definitions -->\n"
-   ." <style type=\"text/css\"><![CDATA[\n$style "
-   # about 80% (12.8 => 13) for edge labels
-   .".edge {\n  text-anchor: middle;\n  font-size: 13px;\n }\n"
-   ." ]]></style>\n"
+   ." <style type=\"text/css\"><![CDATA[\n$style ]]></style>\n"
     if $style ne '';
  
   $txt .="</defs>\n\n";
@@ -516,33 +544,45 @@ EOSVG
   # output the graph's background and border
 
   {
-  my $bg = $self->attribute('fill'); $bg = 'white' unless defined $bg; 
+  my $bg = $self->color_attribute('fill'); $bg = 'white' unless defined $bg; 
   my $br = $self->attribute('border-style'); $br = '' unless defined $br;
-  my $cl = $self->attribute('border-color'); $cl = 'none' unless defined $cl;
+  my $cl = $self->color_attribute('border-color'); $cl = 'none' unless defined $cl;
   my $bw = $self->attribute('border-width'); $bw = '1' unless defined $bw;
 
   # We always need to output a background rectangle, otherwise printing the
   # SVG from Firefox ends you up with a black background, which rather ruins
   # the day:
 
-  my $d = ''; $d = ' stroke-dasharray="' . $strokes->{$br} .'"' if exists $strokes->{$br};
-  my $sw = ''; $sw = ' stroke-width="' . $bw .'"' if $bw != 1;
+  # XXX TODO adjust dasharray
+  my $att = {
+    'stroke-dasharray' => $strokes->{$br} || '',
+    'stroke-width' => $bw,
+    'stroke' => $cl,
+    'fill' => $bg,
+    };
+  my $d = $self->_svg_attributes_as_txt($self->_adjust_dasharray($att));
 
-  my $xr = $mx + $em / 2;
-  my $yr = $my + $em / 2;
-  $txt .= '<!-- graph background with border (mainly for printing) -->' .
-        "\n<rect x=\"0\" y=\"0\" width=\"$xr\" height=\"$yr\" fill=\"$bg\"$d stroke=\"$cl\"$sw />\n\n";
+  my $em2 = $em / 2;
+  my $xr = $mx + $em2;
+  my $yr = $my + $em2;
 
   if ($br ne '')
     {
     # Provide some padding around the graph to avoid that the border sticks
     # very close to the edge
-    $xl += $em / 2;
-    $yl += $em / 2;
+    $xl += $em2 + $bw;
+    $yl += $em2 + $bw;
 
-    $mx += $em;
-    $my += $em;
+    $xr += $em2 + 2 * $bw;
+    $yr += $em2 + 2 * $bw;
+
+    $mx += $em + 4 * $bw;
+    $my += $em + 4 * $bw;
     }
+
+  $txt .= '<!-- graph background with border (mainly for printing) -->' .
+        "\n<rect x=\"0\" y=\"0\" width=\"$xr\" height=\"$yr\"$d />\n\n";
+
   }
 
   ###########################################################################
@@ -557,7 +597,7 @@ EOSVG
 
     my $l = "  <!-- graph label -->\n" .
             Graph::Easy::Node::_svg_text($self, 
-		$self->attribute('color') || 'black', $em, '  ', $mx / 2, $y);
+		$self->color_attribute('color') || 'black', $em, '  ', $mx / 2, $y);
 
     $l = Graph::Easy::Node::_link($self, $l, '', $title, $link) if $link ne '';
 
@@ -707,7 +747,7 @@ sub _svg_background
   my $svg = '';
   if ($bg ne '')
     {
-    $bg = $self->{group}->attribute('fill') if $bg eq 'inherit';
+    $bg = $self->{group}->color_attribute('fill') if $bg eq 'inherit';
     $bg = '' if $bg eq 'inherit';
     if ($bg ne '')
       {
@@ -721,12 +761,15 @@ sub _svg_background
   my $x2 = $x + $self->{w} - 0.5;
   my $y2 = $y + $self->{h} - 0.5; 
   
-  my $color = 'stroke="' . ($self->attribute('border-color') || 'black') . '"';
-  my $width = $self->attribute('border-width') || 1;
-  my $w = ''; $w = 'stroke-width="' . $width . '" ' if $width != 1;
-
   my $style = $self->attribute('border-style');
-  my $d = ' stroke-dasharray="' . ($strokes->{$style}||'1 0') .'"';
+  my $att = { 
+    'stroke'  => $self->color_attribute('border-color') || 'black',
+    'stroke-dasharray' => $strokes->{$style}||'1 0',
+    'stroke-width' => $self->attribute('border-width') || 1,
+    };
+  $self->_adjust_dasharray($att);
+
+  my $stroke = $self->_svg_attributes_as_txt($att, 0, 0);  # x,y are not used
 
   my $c = $self->{cell_class}; $c =~ s/^\s+//; $c =~ s/\s+\z//;
 
@@ -736,7 +779,7 @@ sub _svg_background
     {
     last if $class =~ /^(\s+|gi)\z/;		# inner => no border, skip empty
  
-    my $l = "$indent<line " . $coords->{$class} . " $color$w$d/>\n";
+    my $l = "$indent<line " . $coords->{$class} . " $stroke/>\n";
 
     $l =~ s/XX0/$x/g;
     $l =~ s/XX1/$x2/g;
@@ -886,6 +929,7 @@ BEGIN
   *EM = \&Graph::Easy::EM;
   *text_styles_as_svg = \&Graph::Easy::text_styles_as_svg;
   *_svg_text = \&Graph::Easy::_svg_text;
+  *_adjust_dasharray = \&Graph::Easy::_adjust_dasharray;
   }
 
 sub as_svg
@@ -942,7 +986,7 @@ sub as_svg
         {
         $a->{$key} = $att->{$key};
         }
-      $a->{stroke} = $self->attribute('border-color') || 'black';
+      $a->{stroke} = $self->color_attribute('border-color') || 'black';
       $a->{fill} = $a->{stroke} if $s eq 'dot';
 
       my $att_txt = $self->_svg_attributes_as_txt($a, $xt, $yt);
@@ -1035,10 +1079,12 @@ sub as_svg
     $lines /= 2;
     my $yt = int($y + $self->{h} / 2 - $em * $lines - $em * 0.1);
 
-    $yt += $self->{h} * 0.3 if $s =~ /^(triangle|trapezium)\z/;
-    $yt -= $self->{h} * 0.3 if $s =~ /^inv(triangle|trapezium)\z/;
+    $yt += $self->{h} * 0.25 if $s =~ /^(triangle|trapezium)\z/;
+    $yt -= $self->{h} * 0.25 if $s =~ /^inv(triangle|trapezium)\z/;
+    $yt += $self->{h} * 0.10 if $s eq 'house';
+    $yt -= $self->{h} * 0.10 if $s eq 'invhouse';
   
-    my $color = $self->attribute('color') || 'black';
+    my $color = $self->color_attribute('color') || 'black';
 
     $svg .= $self->_svg_text($color, $em, $indent, $xt, $yt);
     }
@@ -1059,17 +1105,10 @@ sub _link
   # FF 1.5 display the title only while outside the text-area)
   $title = ' xlink:title="' . $title . '"' if $title ne '';
 
-  # Bug in Firefox 1.5, it will open the link inside the SVG frame. Force it
-  # to replace the window just like when you click an image.
-  my $onclick = ' onclick="top.location.href=\'' . $link . "'\"";
-
-  my $indent2 = $indent x 2; $indent2 = ' ' if $indent eq '';
-
   $svg =~ s/\n\z//;
-  $svg = $indent . "<g$onclick>\n" . 
-         $indent2 . "<a xlink:target=\"_blank\" xlink:show=\"new\" xlink:href=\"$link\"$title>\n$indent" . $svg .
-         $indent2 . "</a>\n" .
-         $indent . "</g>\n\n";
+  $svg =
+         $indent . "<a xlink:target=\"_top\" xlink:href=\"$link\"$title>\n$indent" . $svg .
+         $indent . "</a>\n\n";
 
   $svg;
   }
@@ -1160,7 +1199,7 @@ sub _svg_attributes
     my $xl = _sprintf($x + $sub3);
     my $xr = _sprintf($x2 - $sub3);
 
-    $shape = "polygon points=\"$xl,$y1, $x1,$y, $xr,$y1, $x1,$y2\" stroke-linecap=\"round\"";
+    $shape = "polygon points=\"$xl,$y1, $x1,$y, $xr,$y1, $x1,$y2\"";
     }
   elsif ($shape eq 'house')
     {
@@ -1275,7 +1314,7 @@ sub _svg_attributes
   $att->{shape} = $shape;
 
   my $border_style = $self->attribute('border-style') || 'solid';
-  my $border_color = $self->attribute('border-color') || 'black';
+  my $border_color = $self->color_attribute('border-color') || 'black';
 
   $att->{'stroke-width'} = $border_width if $border_width ne '1';
   $att->{stroke} = $border_color;
@@ -1284,6 +1323,7 @@ sub _svg_attributes
     {
     $att->{'stroke-dasharray'} = $strokes->{$border_style}
      if exists $strokes->{$border_style};
+    $self->_adjust_dasharray($att);
     }
   
   if ($border_style eq 'none')
@@ -1291,7 +1331,8 @@ sub _svg_attributes
     delete $att->{'stroke-width'};
     delete $att->{stroke};
     }
-  $att->{fill} = $self->attribute('fill') || 'white';
+
+  $att->{fill} = $self->color_attribute('fill') || 'white';
   # include the fill for renderers that can't cope with CSS styles
   # delete $att->{fill} if $att->{fill} eq 'white';	# white is default
 
@@ -1309,7 +1350,7 @@ sub _svg_attributes_as_txt
   foreach my $e (sort keys %$att)
     {
     # skip these
-    next if $e =~ /^(arrow-style|text-style|label-color|rows|cols|size|offset|origin|rotate)\z/;
+    next if $e =~ /^(arrow-style|text-style|label-color|rows|cols|size|offset|origin|rotate|colorscheme)\z/;
 
     $att_line .= " $e=\"$att->{$e}\"";
     if (length($att_line) > 75)
@@ -1530,17 +1571,17 @@ sub _svg_arrow
     }
   if ($arrow_style eq 'closed')
     {
-    $a->{fill} = $self->attribute('background');
-    $a->{fill} = $self->{graph}->attribute('graph', 'background') if $a->{fill} eq 'inherit';
+    $a->{fill} = $self->color_attribute('background');
+    $a->{fill} = $self->{graph}->color_attribute('graph', 'background') if $a->{fill} eq 'inherit';
     $a->{fill} = 'white' if $a->{fill} eq 'inherit';
     }
   elsif ($arrow_style eq 'filled')
     {
-    $a->{fill} = $self->attribute('fill');
+    $a->{fill} = $self->color_attribute('fill');
     }
   elsif ($class eq 'ahb')
     {
-    $a->{fill} = $self->attribute('color'); delete $a->{fill} unless $a->{fill};
+    $a->{fill} = $self->color_attribute('color'); delete $a->{fill} unless $a->{fill};
     }
 
   my $att_txt = $self->_svg_attributes_as_txt($a);
@@ -1769,7 +1810,7 @@ sub _svg_attributes
 
   my $att = {};
 
-  $att->{stroke} = $self->attribute('color') || 'black';
+  $att->{stroke} = $self->color_attribute('color') || 'black';
   # include the stroke for renderers that can't cope with CSS styles
   # delete $att->{stroke} if $att->{stroke} eq 'black';	# black is default
 
@@ -1785,6 +1826,8 @@ sub _svg_attributes
   $att->{'stroke-width'} = 3 if $style =~ /^bold/;
   $att->{'stroke-width'} = $em / 2 if $style =~ /^broad/;
   $att->{'stroke-width'} = $em if $style =~ /^wide/;
+
+  $self->_adjust_dasharray($att);
 
   $att->{'arrow-style'} = $self->attribute('arrow-style') || '';
   $att;
@@ -1858,6 +1901,7 @@ sub as_svg
       $sn = $em / 2 if $style =~ /^broad/;
       $sn = $em if $style =~ /^wide/;
 
+      # XXX adjust dash array
       $add = ' stroke="' . $self->{color_ver} . '"' if $self->{color_ver};
       $add .= ' stroke-dasharray="' . ($strokes->{$style}||'1 0') .'"';
       $add .= ' stroke-width="' . $sn . '"' if $sn ne $sw;
@@ -1931,10 +1975,13 @@ sub as_svg
 
     if ($label ne '')
       {
+      my $em2 = $em / 2;
       my $xt = int($x + $self->{w} / 2);
-      my $yt = int($y + $em + $em * 0.2);
+      my $yt = int($y + ($self->{h} / 2) - $em2);
 
       my $style = '';
+
+      my $stype = $self->{type};
 
       # for HOR edges
       if ($type == EDGE_HOR)
@@ -1953,20 +2000,39 @@ sub as_svg
           $xt = int($xt + $em * $shift);
           }
         }
+      elsif ($type == EDGE_VER)
+        {
+	# put label right of the edge
+	$xt = $xt + 1.5 * $em;
+        $yt = int($y + $self->{h} / 2);
+	$style = ' text-anchor="left"';
+        }
+      # selfloops
       else
         {
-        # put label right of the edge
-        my ($w,$h) = $self->dimensions();
-        $xt = $xt + $w * $em / 2;
-        $yt += $em if $self->{type} & EDGE_START_N;
-        $yt -= $em if $self->{type} & EDGE_START_S;
-        $style = ' text-align="left"';
+	# put label right of the edge
+	my ($w,$h) = $self->dimensions();
+
+	# hor loops:
+	$yt += $em2 if $stype & EDGE_START_N;
+	$yt -= $em2 if $stype & EDGE_START_S;
+
+	# vertical loops
+        $yt = int($y + $self->{h} / 2)
+	  if ($stype & EDGE_START_E) || ($stype & EDGE_START_W);
+        $xt = int($x + $em * 2) if ($stype & EDGE_START_E);
+        $xt = int($x + $self->{w} - 2*$em) if ($stype & EDGE_START_W);
+
+	$style = ' text-anchor="left"';
+	$style = ' text-anchor="middle"'
+	  if ($stype & EDGE_START_N) || ($stype & EDGE_START_S);
+        $style = ' text-anchor="right"' if ($stype & EDGE_START_W);
         }
 
-      my $color = $self->attribute('label-color') || '';
+      my $color = $self->color_attribute('label-color') || '';
 
       # fall back to color if label-color not defined
-      $color = $self->attribute('color') || 'black' if $color eq '';
+      $color = $self->color_attribute('color') || 'black' if $color eq '';
 
       $svg .= $self->_svg_text($color, $em, $indent, $xt, $yt, $style);
       }
