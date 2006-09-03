@@ -8,7 +8,7 @@ name		'Graph-Easy-As_svg';
 # Get most of the details from the primary module
 all_from	'lib/Graph/Easy/As_svg.pm';
    
-requires	'Graph::Easy'	=> 0.46;
+requires	'Graph::Easy'	=> 0.47;
 requires	'Image::Info'	=> 1.22;
  
 build_requires	'Test::More'	=> 0.42;

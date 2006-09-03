@@ -8,7 +8,7 @@ package Graph::Easy::As_svg;
 
 use vars qw/$VERSION/;
 
-$VERSION = '0.19';
+$VERSION = '0.20';
 
 use strict;
 use utf8;
@@ -304,8 +304,8 @@ sub text_styles_as_svg
 
 my $al_map = {
   'c' => 'middle',
-  'l' => 'left',
-  'r' => 'right',
+  'l' => 'start',
+  'r' => 'end',
   };
 
 sub _svg_text
@@ -332,8 +332,8 @@ sub _svg_text
       {
       # quote "<" and ">", "&" and also '"'
       $line = _quote($line); 
-      my $al = ' style="' . $al_map->{$aligns->[$i]} . '"'; $al = '' if $aligns->[$i] eq substr($align,0,1);
-      my $join = "</tspan$al>"; $join .= "\n$in<tspan x=\"$x\" y=\"$dy\">" if $i < @$lines - 1;
+      my $al = ' text-align="' . $al_map->{$aligns->[$i+1]||'c'} . '"'; $al = '' if $aligns->[$i] eq substr($align,0,1);
+      my $join = "</tspan>"; $join .= "\n$in<tspan x=\"$x\" y=\"$dy\"$al>" if $i < @$lines - 1;
       $dy += $lh;
       $label .= $line . $join;
       $i++;
@@ -351,7 +351,7 @@ sub _svg_text
   my $link = _quote($self->link());
 
   # For an edge, the default stroke is black, but this will render a black
-  # outline around colored text. So disable the stroke with "non".
+  # outline around colored text. So disable the stroke with "none".
   my $stroke = ''; $stroke = ' stroke="none"' if ref($self) =~ /Edge/;
 
   $style = '' unless defined $style;
@@ -405,7 +405,7 @@ sub _adjust_dasharray
 
   my @dashes = split /\s*,\s*/, $att->{'stroke-dasharray'};
   for my $d (@dashes)
-    { 
+    {
     $d *= $s;	# modify in place
     }
   $att->{'stroke-dasharray'} = join (',', @dashes);
@@ -761,10 +761,10 @@ sub _svg_background
   my $x2 = $x + $self->{w} - 0.5;
   my $y2 = $y + $self->{h} - 0.5; 
   
-  my $style = $self->attribute('border-style');
+  my $style = $self->attribute('border-style')||'dashed';
   my $att = { 
     'stroke'  => $self->color_attribute('border-color') || 'black',
-    'stroke-dasharray' => $strokes->{$style}||'1 0',
+    'stroke-dasharray' => $strokes->{$style}||'3, 1',
     'stroke-width' => $self->attribute('border-width') || 1,
     };
   $self->_adjust_dasharray($att);
@@ -1069,15 +1069,14 @@ sub as_svg
     ###########################################################################
     # include the label/name/text
 
-    my $xt = int($x + $em * 0.05 + $self->{w} / 2);
+    my $xt = int($x + $self->{w} / 2);
 
     my $label = $self->label();
 
-    # count lines
-    my $lines = -1; $label =~ s/\\n/ $lines++; '\\n' /eg; 
+    my ($w,$h) = $self->_svg_dimensions();
+    my $lh = $self->LINE_HEIGHT();
 
-    $lines /= 2;
-    my $yt = int($y + $self->{h} / 2 - $em * $lines - $em * 0.1);
+    my $yt = int($y + $self->{h} / 2 + $lh / 3 - ($h -1) * $lh / 2);
 
     $yt += $self->{h} * 0.25 if $s =~ /^(triangle|trapezium)\z/;
     $yt -= $self->{h} * 0.25 if $s =~ /^inv(triangle|trapezium)\z/;
@@ -1086,7 +1085,8 @@ sub as_svg
   
     my $color = $self->color_attribute('color') || 'black';
 
-    $svg .= $self->_svg_text($color, $em, $indent, $xt, $yt);
+    my $style = ' text-anchor="middle"';
+    $svg .= $self->_svg_text($color, $em, $indent, $xt, $yt, $style);
     }
 
   # Create the link
@@ -1553,6 +1553,8 @@ sub _svg_arrow
   return '' if $arrow_style eq 'none';
 
   my $class = 'ah' . substr($arrow_style,0,1);
+  # aho => ah
+  $class = 'ah' if $class eq 'aho';
   # ah => ahb for bold/broad/wide edges with open arrows
   $class .= 'b' if $s > 1 && $class eq 'ah';
 
@@ -1571,8 +1573,8 @@ sub _svg_arrow
     }
   if ($arrow_style eq 'closed')
     {
-    $a->{fill} = $self->color_attribute('background');
-    $a->{fill} = $self->{graph}->color_attribute('graph', 'background') if $a->{fill} eq 'inherit';
+    $a->{fill} = $self->color_attribute('background') || 'inherit';
+    $a->{fill} = $self->{graph}->color_attribute('graph', 'background') || 'inherit' if $a->{fill} eq 'inherit';
     $a->{fill} = 'white' if $a->{fill} eq 'inherit';
     }
   elsif ($arrow_style eq 'filled')
@@ -2003,9 +2005,10 @@ sub as_svg
       elsif ($type == EDGE_VER)
         {
 	# put label right of the edge
-	$xt = $xt + 1.5 * $em;
-        $yt = int($y + $self->{h} / 2);
-	$style = ' text-anchor="left"';
+	my ($w,$h) = $self->dimensions();
+	$xt = $xt + $em2;
+        $yt = int($y + $self->{h} / 2 - $h * $em2 + $em2);
+	$style = ' text-anchor="start"';
         }
       # selfloops
       else
@@ -2016,17 +2019,20 @@ sub as_svg
 	# hor loops:
 	$yt += $em2 if $stype & EDGE_START_N;
 	$yt -= $em2 if $stype & EDGE_START_S;
+        $yt += $em
+	  if ($h > 1) && ($stype & EDGE_START_S);
 
 	# vertical loops
         $yt = int($y + $self->{h} / 2)
 	  if ($stype & EDGE_START_E) || ($stype & EDGE_START_W);
+
         $xt = int($x + $em * 2) if ($stype & EDGE_START_E);
         $xt = int($x + $self->{w} - 2*$em) if ($stype & EDGE_START_W);
 
-	$style = ' text-anchor="left"';
+	$style = ' text-anchor="start"';
 	$style = ' text-anchor="middle"'
 	  if ($stype & EDGE_START_N) || ($stype & EDGE_START_S);
-        $style = ' text-anchor="right"' if ($stype & EDGE_START_W);
+        $style = ' text-anchor="end"' if ($stype & EDGE_START_W);
         }
 
       my $color = $self->color_attribute('label-color') || '';

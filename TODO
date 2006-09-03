@@ -1,8 +1,6 @@
 Todo for Graph-Easy-As_svg
 ==========================
 
-* multi-line text labels and text-labels on ver edges cross into the edge line
-
 Output bugs:
 
 * Borders on nodes/graph are placed on the path center. Instead they should

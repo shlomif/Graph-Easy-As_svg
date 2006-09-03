@@ -12,6 +12,6 @@ no_index:
     - inc
     - t
 requires: 
-  Graph::Easy: 0.46
+  Graph::Easy: 0.47
   Image::Info: 1.22
-version: 0.19
+version: 0.20

@@ -1,5 +1,16 @@
 Revision history for Graph::Easy::As_svg:
 
+2006-09-03 v0.20 Tels 89 tests - Fix, fix, fix, fix the bugs...
+  * require Graph::Easy 0.47
+  * fix invalid output on multi-line aligned labels
+  * fix alignment of labels on loops and vertical edges (text-align takes
+    "start" or "end", not "left" or "right" - duh!)
+  * correct the placement of multi-line node labels, especially when
+    using \r, \l or \c instead of \n
+  * fix warning and missing arrows when using edge { arrow-style: open; }
+  * fix undef warning when using closed arrows
+  * fix problem with dasharrays when using groups
+
 2006-08-13 v0.19 Tels 89 tests - Fix, fix, fix, fix the bugs...
   * single-line labels were not properly quoted (for "<>&)
   * add encoding="UTF-8" to XML header to make encoding explicit
