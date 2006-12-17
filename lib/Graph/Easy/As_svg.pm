@@ -8,7 +8,7 @@ package Graph::Easy::As_svg;
 
 use vars qw/$VERSION/;
 
-$VERSION = '0.20';
+$VERSION = '0.21';
 
 use strict;
 use utf8;
@@ -311,10 +311,11 @@ my $al_map = {
 sub _svg_text
   { 
   # create a text via <text> at pos x,y, indented by "$indent"
-  my ($self, $color, $em, $indent, $x, $y, $style) = @_;
+  my ($self, $color, $em, $indent, $x, $y, $style, $xl, $xr) = @_;
 
-  my $align = $self->attribute('align') || $self->default_attribute('align') || 'center';
-  my $text_wrap = $self->attribute('text-wrap') || 'none';
+  my $align = $self->attribute('align');
+
+  my $text_wrap = $self->attribute('textwrap');
   my ($lines, $aligns) = $self->_aligned_label($align, $text_wrap);
 
   # We can't just join them togeter with 'x=".." dy="1em"' because Firefox 1.5
@@ -332,7 +333,7 @@ sub _svg_text
       {
       # quote "<" and ">", "&" and also '"'
       $line = _quote($line); 
-      my $al = ' text-align="' . $al_map->{$aligns->[$i+1]||'c'} . '"'; $al = '' if $aligns->[$i] eq substr($align,0,1);
+      my $al = ' text-anchor="' . $al_map->{$aligns->[$i+1]||'c'} . '"'; $al = '' if $aligns->[$i] eq substr($align,0,1);
       my $join = "</tspan>"; $join .= "\n$in<tspan x=\"$x\" y=\"$dy\"$al>" if $i < @$lines - 1;
       $dy += $lh;
       $label .= $line . $join;
@@ -342,7 +343,7 @@ sub _svg_text
     }
   else
     {
-    $label = _quote($lines->[0]);
+    $label = _quote($lines->[0]) if @$lines;
     }
 
   my $fs; $fs = $self->text_styles_as_svg() if $label ne '';
@@ -354,8 +355,14 @@ sub _svg_text
   # outline around colored text. So disable the stroke with "none".
   my $stroke = ''; $stroke = ' stroke="none"' if ref($self) =~ /Edge/;
 
-  $style = '' unless defined $style;
-
+  if (!defined $style)
+    {
+    $x = $xl if $align eq 'left';
+    $x = $xr if $align eq 'right';
+    $style = '';
+    my $def_align = $self->default_attribute('align');
+    $style = ' text-anchor="' . $al_map->{substr($align,0,1)} . '"' if $def_align ne $align;
+    }
   my $svg = "$indent<text x=\"$x\" y=\"$y\"$fs fill=\"$color\"$stroke$style>$label</text>\n";
 
   $svg . "\n"
@@ -396,9 +403,22 @@ sub _adjust_dasharray
   # match it.
   my ($self,$att) = @_;
 
-  return unless exists $att->{'stroke-dasharray'}; 
-
+  # convert "20px" to "20"
+  # convert "2em" to "xx"
   my $s = $att->{'stroke-width'} || 1;
+
+  $s =~ s/px//;
+  
+  if ($s =~ /(\d+)em/)
+    {
+    my $em = $self->EM();
+    $s = $1 * $em;
+    }
+  $att->{'stroke-width'} = $s;
+
+  delete $att->{'stroke-width'} if $s eq '1';
+
+  return $att unless exists $att->{'stroke-dasharray'}; 
 
   # for very thin line, make it a bit bigger as to be actually visible
   $s = 2 if $s < 2;
@@ -466,7 +486,7 @@ EOSVG
     background => 'fill',
     'align' => \&_remap_align,
     'color' => 'stroke',
-    'font-size' => \&_remap_font_size,
+    'fontsize' => \&_remap_font_size,
     'font' => 'font-family',
     };
   my $skip = qr/^(
@@ -507,18 +527,11 @@ EOSVG
     },
     node => {
       "font-size" => '16px',
+      "text-anchor" => 'middle',
     },
   };
   # generate the class attributes first
   my $style = $self->_class_styles( $skip, $mutator, '', ' ', $overlay);
-
-  ## output groups first, with their nodes
-  #foreach my $gn (sort keys %{$self->{groups}})
-  #  {
-  #  my $group = $self->{groups}->{$gn};
-  #  $txt .= $group->as_txt();		# marks nodes as processed if nec.
-  #  $count++;
-  #  }
 
   $txt .= 
     "\n <!-- class definitions -->\n"
@@ -535,7 +548,7 @@ EOSVG
 
   if ($label ne '')
     {
-    $lp = $self->attribute('label-pos') || 'top';
+    $lp = $self->attribute('labelpos');
 
     $my += $em * 2;
     }
@@ -544,46 +557,52 @@ EOSVG
   # output the graph's background and border
 
   {
-  my $bg = $self->color_attribute('fill'); $bg = 'white' unless defined $bg; 
-  my $br = $self->attribute('border-style'); $br = '' unless defined $br;
-  my $cl = $self->color_attribute('border-color'); $cl = 'none' unless defined $cl;
-  my $bw = $self->attribute('border-width'); $bw = '1' unless defined $bw;
+    # 'inherit' only works for HTML, not for SVG
+    my $bg = $self->color_attribute('fill'); $bg = 'white' if $bg eq 'inherit';
+    my $br = $self->attribute('borderstyle');
+    my $cl = $self->color_attribute('bordercolor'); $cl = $bg if $br eq 'none';
+    my $bw = $self->attribute('borderwidth') || 1;
 
-  # We always need to output a background rectangle, otherwise printing the
-  # SVG from Firefox ends you up with a black background, which rather ruins
-  # the day:
+    $bw =~ s/px//;
 
-  # XXX TODO adjust dasharray
-  my $att = {
-    'stroke-dasharray' => $strokes->{$br} || '',
-    'stroke-width' => $bw,
-    'stroke' => $cl,
-    'fill' => $bg,
-    };
-  my $d = $self->_svg_attributes_as_txt($self->_adjust_dasharray($att));
+    # We always need to output a background rectangle, otherwise printing the
+    # SVG from Firefox ends you up with a black background, which rather ruins
+    # the day:
 
-  my $em2 = $em / 2;
-  my $xr = $mx + $em2;
-  my $yr = $my + $em2;
+    # XXX TODO adjust dasharray
+    my $att = {
+      'stroke-dasharray' => $strokes->{$br} || '',
+      'stroke-width' => $bw,
+      'stroke' => $cl,
+      'fill' => $bg,
+      };
+    # avoid stroke-dasharray="":
+    delete $att->{'stroke-dasharray'} unless $att->{'stroke-dasharray'} ne '';
 
-  if ($br ne '')
-    {
-    # Provide some padding around the graph to avoid that the border sticks
-    # very close to the edge
-    $xl += $em2 + $bw;
-    $yl += $em2 + $bw;
+    my $d = $self->_svg_attributes_as_txt($self->_adjust_dasharray($att));
 
-    $xr += $em2 + 2 * $bw;
-    $yr += $em2 + 2 * $bw;
+    my $em2 = $em / 2;
+    my $xr = $mx + $em2;
+    my $yr = $my + $em2;
 
-    $mx += $em + 4 * $bw;
-    $my += $em + 4 * $bw;
-    }
+    if ($br ne '')
+      {
+      # Provide some padding around the graph to avoid that the border sticks
+      # very close to the edge
+      $xl += $em2 + $bw;
+      $yl += $em2 + $bw;
 
-  $txt .= '<!-- graph background with border (mainly for printing) -->' .
+      $xr += $em2 + 2 * $bw;
+      $yr += $em2 + 2 * $bw;
+
+      $mx += $em + 4 * $bw;
+      $my += $em + 4 * $bw;
+      }
+
+    $txt .= '<!-- graph background with border (mainly for printing) -->' .
         "\n<rect x=\"0\" y=\"0\" width=\"$xr\" height=\"$yr\"$d />\n\n";
 
-  }
+    } # end outpuf of background
 
   ###########################################################################
   # adjust space for the graph label and output the label
@@ -619,7 +638,7 @@ EOSVG
       $y += $rows->{ $n->{y} };
       }
 
-    my $class = $n->{class}; $class =~ s/\./-/;	# node.city => node-city
+    my $class = $n->{class}; $class =~ s/\./_/;	# node.city => node-city
     my $obj_txt = $n->as_svg($x,$y,' ', $rows, $cols);
     if ($obj_txt ne '')
       {
@@ -710,6 +729,17 @@ sub as_svg
   '';
   }
 
+sub _correct_size_svg
+  {
+  my $self = shift;
+
+  my $em = $self->EM();		# multiplication factor chars * em = units (pixels)
+
+  $self->{w} = 3;
+  $self->{h} = 3;
+  $self;
+  }
+
 #############################################################################
 #############################################################################
 
@@ -763,9 +793,9 @@ sub _svg_background
   
   my $style = $self->attribute('border-style')||'dashed';
   my $att = { 
-    'stroke'  => $self->color_attribute('border-color') || 'black',
+    'stroke'  => $self->color_attribute('bordercolor'),
     'stroke-dasharray' => $strokes->{$style}||'3, 1',
-    'stroke-width' => $self->attribute('border-width') || 1,
+    'stroke-width' => $self->attribute('borderwidth') || 1,
     };
   $self->_adjust_dasharray($att);
 
@@ -806,7 +836,7 @@ sub as_svg
   my ($self, $xl, $yl, $indent, $rows, $cols) = @_;
 
   my $txt = '';
-  for my $cell (values %{$self->{cells}})
+  for my $cell (values %{$self->{_cells}})
     {
     # get position from cell
     my $x = $cols->{ $cell->{x} } + $xl;
@@ -944,6 +974,7 @@ sub as_svg
   # the attributes of the element we will finally output
   my $att = $self->_svg_attributes($x,$y);
   
+  # the output shape as svg-tag
   my $shape = $att->{shape};				# rect, circle etc
   delete $att->{shape};
 
@@ -953,20 +984,19 @@ sub as_svg
   my $title = _quote($self->title());
   $att->{title} = $title if $title ne '';
 
-  my $s = $self->attribute('shape') || 'rect';
+  # the original shape
+  my $s = ''; $s = $self->attribute('shape') unless $self->isa_cell();
 
   my $link = $self->link();
   my $old_indent = $indent; $indent = $indent x 2 if $link ne '';
 
   my $out_name = Graph::Easy::As_svg::_quote_name($name);
-  my $svg = "$indent<!-- $out_name, $s -->\n";
-
-  $indent .= $old_indent if $link ne '';
+  my $svg = "$indent<!-- $out_name, $shape -->\n";
 
   # render the background, except for "rect" where it is not visible
   $svg .= $self->_svg_background($x,$y, $indent) if $shape ne 'rect';
 
-  my $bs = $self->attribute('border-style') || '';
+  my $bs = $self->attribute('borderstyle');
 
   my $xt = int($x + $self->{w} / 2);
   my $yt = int($y + $self->{h} / 2);
@@ -1037,7 +1067,7 @@ sub as_svg
           }
         }
 
-      my $att_txt = $self->_svg_attributes_as_txt($att, $xt, $yt) || '';
+      my $att_txt = $self->_svg_attributes_as_txt($att, $xt, $yt);
 
       my $shape_svg = "$indent<$shape$att_txt />\n";
 
@@ -1069,8 +1099,6 @@ sub as_svg
     ###########################################################################
     # include the label/name/text
 
-    my $xt = int($x + $self->{w} / 2);
-
     my $label = $self->label();
 
     my ($w,$h) = $self->_svg_dimensions();
@@ -1085,8 +1113,9 @@ sub as_svg
   
     my $color = $self->color_attribute('color') || 'black';
 
-    my $style = ' text-anchor="middle"';
-    $svg .= $self->_svg_text($color, $em, $indent, $xt, $yt, $style);
+    $svg .= $self->_svg_text($color, $em, $indent, $xt, $yt, 
+		       # left    # right
+		undef, int($x + $em/2), int($x + $self->{w} - $em/2));
     }
 
   # Create the link
@@ -1107,7 +1136,7 @@ sub _link
 
   $svg =~ s/\n\z//;
   $svg =
-         $indent . "<a xlink:target=\"_top\" xlink:href=\"$link\"$title>\n$indent" . $svg .
+         $indent . "<a xlink:target=\"_top\" xlink:href=\"$link\"$title>\n" . $svg .
          $indent . "</a>\n\n";
 
   $svg;
@@ -1350,7 +1379,7 @@ sub _svg_attributes_as_txt
   foreach my $e (sort keys %$att)
     {
     # skip these
-    next if $e =~ /^(arrow-style|text-style|label-color|rows|cols|size|offset|origin|rotate|colorscheme)\z/;
+    next if $e =~ /^(arrowstyle|textstyle|labelcolor|rows|cols|size|offset|origin|rotate|colorscheme)\z/;
 
     $att_line .= " $e=\"$att->{$e}\"";
     if (length($att_line) > 75)
@@ -1400,7 +1429,7 @@ sub _correct_size_svg
   $self->{h} = int($h * $lh + $em);
 
   my $border = 'none';
-  $border = $self->attribute('border-style') || 'none' if $shape ne 'none';
+  $border = $self->attribute('borderstyle') || '' if $shape ne 'none';
 
   if ($border ne 'none')
     {
@@ -1421,7 +1450,6 @@ sub _correct_size_svg
     $self->{h} = $max;
     $self->{w} = $max;
     }
-
   }
  
 1;
@@ -1749,7 +1777,7 @@ sub _correct_size_svg
 
   return if defined $self->{w};
 
-  #my $border = $self->{edge}->attribute('border-style') || 'none';
+  #my $border = $self->{edge}->attribute('borderstyle');
 
   # set the minimum width/height
   my $type = $self->{type} & EDGE_TYPE_MASK();
@@ -2035,10 +2063,10 @@ sub as_svg
         $style = ' text-anchor="end"' if ($stype & EDGE_START_W);
         }
 
-      my $color = $self->color_attribute('label-color') || '';
+      my $color = $self->raw_attribute('labelcolor');
 
       # fall back to color if label-color not defined
-      $color = $self->color_attribute('color') || 'black' if $color eq '';
+      $color = $self->color_attribute('color') if !defined $color;
 
       $svg .= $self->_svg_text($color, $em, $indent, $xt, $yt, $style);
       }

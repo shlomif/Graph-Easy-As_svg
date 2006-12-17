@@ -5,7 +5,7 @@ use strict;
 
 BEGIN
    {
-   plan tests => 71;
+   plan tests => 75;
    chdir 't' if -d 't';
    use lib '../lib';
    use_ok ("Graph::Easy") or die($@);
@@ -252,4 +252,18 @@ $svg = $graph->as_svg();
 like ($svg, qr/<!-- quote &amp; &lt; &gt; ",/, 'quoted');
 like ($svg, qr/>quote &amp; &lt; &gt; &quot;<\/text>/, 'quoted');
 
+#############################################################################
+# check that node.cities is converted to "node_cities"
+
+$bonn->set_attribute( 'class' => 'cities' );
+
+$svg = $graph->as_svg();
+like ($svg, qr/class="node_cities"/, 'node.cities => node_cities');
+unlike ($svg, qr/.node,\s*.node_cities/, 'no class style cities yet' );
+
+$graph->set_attribute( 'node.cities', 'color', 'red' );
+$svg = $graph->as_svg();
+
+like ($svg, qr/class="node_cities"/, 'node.cities => node_cities');
+like ($svg, qr/.node,\s*.node_cities/, 'node.cities => node_cities');
 

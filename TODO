@@ -3,6 +3,7 @@ Todo for Graph-Easy-As_svg
 
 Output bugs:
 
+* Anon groups should not have a border
 * Borders on nodes/graph are placed on the path center. Instead they should
   be inside the shape, aka moved BORDER-WIDTH/2 to the inside.
 * Rotated nodes:
@@ -25,6 +26,8 @@ Shorter output:
   edges, like dashed or dotted ones
 * put the stroke-width and stroke on the <g class="edge"> instead on
   each <line>
+* merge all group cells together to create a minimum number of rectangles
+  to render
 
 Browser-specific woes:
 

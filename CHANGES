@@ -1,6 +1,13 @@
 Revision history for Graph::Easy::As_svg:
 
-2006-09-03 v0.20 Tels 89 tests - Fix, fix, fix, fix the bugs...
+2006-12-17 v0.20 Tels 93 tests - Fix, fix, fix, fix the bugs...
+  * require Graph::Easy 0.50
+  * fixes for the changes attribute system in Graph::Easy v0.50
+  * fix alignment of node labels under align: left, align: right etc.
+  * don't output needless things like 'fill=""' or default text-anchor
+  * handle borderwidths like "20px" and "2em"
+
+2006-09-03 v0.20 Tels 89 tests
   * require Graph::Easy 0.47
   * fix invalid output on multi-line aligned labels
   * fix alignment of labels on loops and vertical edges (text-align takes
