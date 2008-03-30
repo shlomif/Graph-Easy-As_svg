@@ -1,27 +1,14 @@
 CHANGES
-Build.PL
-INSTALL
-Makefile.PL
-MANIFEST
-LICENSE
-README
-SIGNATURE
-TODO
+examples/as_ascii
+examples/as_boxart
+examples/as_graphviz
+examples/as_html
 examples/as_svg			parse text and output as standalone SVG
-t/svg.t				SVG output
-t/group.t			SVG output for groups (subgraphs/clusters)
-t/text.t			_text_length()
-t/svg/svg.txt
-t/pod.t				test POD for correctness
-t/pod_cov.t			test POD for covering all subroutines
-lib/Graph/Easy/As_svg.pm	generate SVG output
-META.yml			Module meta-data (added by MakeMaker)
-
+examples/as_txt
 inc/Module/AutoInstall.pm
 inc/Module/Install.pm
 inc/Module/Install/AutoInstall.pm
 inc/Module/Install/Base.pm
-inc/Module/Install/Build.pm
 inc/Module/Install/Can.pm
 inc/Module/Install/Fetch.pm
 inc/Module/Install/Include.pm
@@ -29,3 +16,21 @@ inc/Module/Install/Makefile.pm
 inc/Module/Install/Metadata.pm
 inc/Module/Install/Win32.pm
 inc/Module/Install/WriteAll.pm
+INSTALL
+lib/Graph/Easy/As_svg.pm	generate SVG output
+LICENSE
+Makefile.PL
+MANIFEST
+MANIFEST.SKIP
+META.yml			Module meta-data (added by MakeMaker)
+README
+SIGNATURE
+svg
+t/group.t			SVG output for groups (subgraphs/clusters)
+t/output.t
+t/pod.t				test POD for correctness
+t/pod_cov.t			test POD for covering all subroutines
+t/svg.t				SVG output
+t/svg/svg.txt
+t/text.t			_text_length()
+TODO

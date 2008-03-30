@@ -1,14 +1,13 @@
 #############################################################################
 # output the a Graph::Easy as SVG (Scalable Vector Graphics)
 #
-# (c) by Tels 2004-2006.
 #############################################################################
 
 package Graph::Easy::As_svg;
 
 use vars qw/$VERSION/;
 
-$VERSION = '0.21';
+$VERSION = '0.22';
 
 use strict;
 use utf8;
@@ -107,6 +106,9 @@ sub _quote
   $txt =~ s/>/&gt;/g;
   $txt =~ s/"/&quot;/g;
 
+  # remove "\n"
+  $txt =~ s/(^|[^\\])\\[lcnr]/$1 /g;
+
   $txt;
   }
 
@@ -166,14 +168,14 @@ sub LINE_HEIGHT
 
 my $devs = {
   'ah' => 
-     " <!-- open arrow head -->\n <g id="
+     " <!-- open arrow -->\n <g id="
    . '"ah" stroke-linecap="round" stroke-width="1">' . "\n"
    . '  <line x1="-8" y1="-4" x2="1" y2="0" />'. "\n"
    . '  <line x1="1" y1="0" x2="-8" y2="4" />'. "\n"
    . " </g>\n",
 
   'ahb' => 
-     " <!-- open arrow head for bold edges -->\n <g id="
+     " <!-- open arrow for bold edges -->\n <g id="
    . '"ahb" stroke-linecap="round" stroke-width="1">' . "\n"
    . '  <line x1="-8" y1="-4" x2="1" y2="0" />'. "\n"
    . '  <line x1="1" y1="0" x2="-8" y2="4" />'. "\n"
@@ -181,18 +183,18 @@ my $devs = {
    . " </g>\n",
 
   'ahc' => 
-     " <!-- closed arrow head -->\n <g id="
+     " <!-- closed arrow -->\n <g id="
    . '"ahc" stroke-linecap="round" stroke-width="1">' . "\n"
    . '  <polygon points="-8,-4, 1,0, -8,4"/>'. "\n"
    . " </g>\n",
 
   'ahf' => 
-     " <!-- filled arrow head -->\n <g id="
+     " <!-- filled arrow -->\n <g id="
    . '"ahf" stroke-linecap="round" stroke-width="1">' . "\n"
    . '  <polygon points="-8,-4, 1,0, -8,4"/>'. "\n"
    . " </g>\n",
 
-  # point-styles
+  # point-shapes
   'diamond' =>
      " <g id="
    . '"diamond">' . "\n"
@@ -206,10 +208,7 @@ my $devs = {
   'star' =>
      " <g id="
    . '"star">' . "\n"
-   . '  <line x1="0" y1="-5" x2="0" y2="5" />'. "\n"
-   . '  <line x1="-5" y1="0" x2="5" y2="0" />'. "\n"
-   . '  <line x1="-3" y1="-3" x2="3" y2="3" />'. "\n"
-   . '  <line x1="-3" y1="3" x2="3" y2="-3" />'. "\n"
+   . '  <polygon points="0,-6, 1.5,-2, 6,-2, 2.5,1, 4,6, 0,3, -4,6, -2.5,1, -6,-2, -1.5,-2"/>'. "\n"
    . " </g>\n",
   'square' =>
      " <g id="
@@ -228,7 +227,7 @@ my $devs = {
    . '  <line x1="-5" y1="0" x2="5" y2="0" />'. "\n"
    . " </g>\n",
 
-  # point-styles with double border
+  # point-shapes with double border
   'd-diamond' =>
      " <g id="
    . '"d-diamond">' . "\n"
@@ -246,6 +245,12 @@ my $devs = {
    . '"d-square">' . "\n"
    . '  <rect width="10" height="10" />'. "\n"
    . '  <rect width="6" height="6" transform="translate(2,2)" />'. "\n"
+   . " </g>\n",
+  'd-star' =>
+     " <g id="
+   . '"d-star">' . "\n"
+   . '  <polygon points="0,-6, 1.5,-2, 6,-2, 2.5,1, 4,6, 0,3, -4,6, -2.5,1, -6,-2, -1.5,-2"/>'. "\n"
+   . '  <polygon points="0,-4, 1,-1, 4,-1.5, 1.5,0.5, 2.5,3.5, 0,1, -2.5,3.5, -1.5,0.5, -4,-1.5, -1,-1"/>'. "\n"
    . " </g>\n",
   };
 
@@ -311,7 +316,7 @@ my $al_map = {
 sub _svg_text
   { 
   # create a text via <text> at pos x,y, indented by "$indent"
-  my ($self, $color, $em, $indent, $x, $y, $style, $xl, $xr) = @_;
+  my ($self, $color, $indent, $x, $y, $style, $xl, $xr) = @_;
 
   my $align = $self->attribute('align');
 
@@ -333,8 +338,13 @@ sub _svg_text
       {
       # quote "<" and ">", "&" and also '"'
       $line = _quote($line); 
-      my $al = ' text-anchor="' . $al_map->{$aligns->[$i+1]||'c'} . '"'; $al = '' if $aligns->[$i] eq substr($align,0,1);
-      my $join = "</tspan>"; $join .= "\n$in<tspan x=\"$x\" y=\"$dy\"$al>" if $i < @$lines - 1;
+      my $all = $aligns->[$i+1] || substr($align,0,1);
+      my $al = ' text-anchor="' . $al_map->{$all} . '"';
+      $al = '' if $all eq substr($align,0,1);
+      my $xc = $x;
+      $xc = $xl if ($all eq 'l');
+      $xc = $xr if ($all eq 'r');
+      my $join = "</tspan>"; $join .= "\n$in<tspan x=\"$xc\" y=\"$dy\"$al>" if $i < @$lines - 1;
       $dy += $lh;
       $label .= $line . $join;
       $i++;
@@ -361,7 +371,7 @@ sub _svg_text
     $x = $xr if $align eq 'right';
     $style = '';
     my $def_align = $self->default_attribute('align');
-    $style = ' text-anchor="' . $al_map->{substr($align,0,1)} . '"' if $def_align ne $align;
+    $style = ' text-anchor="' . $al_map->{substr($align,0,1)} . '"';
     }
   my $svg = "$indent<text x=\"$x\" y=\"$y\"$fs fill=\"$color\"$stroke$style>$label</text>\n";
 
@@ -457,6 +467,7 @@ EOSVG
     }
 
   my $em = $self->EM();
+  my $LINE_HEIGHT = $self->LINE_HEIGHT();
 
   # XXX TODO: that should use the padding/margin attribute from the graph
   my $xl = int($em / 2); my $yl = int($em / 2);
@@ -490,17 +501,20 @@ EOSVG
     'font' => 'font-family',
     };
   my $skip = qr/^(
-   arrow-style|
-   (auto)?(link|title)|
-   border-color|
-   border-style|
-   border-width|
+   arrow-(style|shape)|
+   (auto)?(link|title|label)|
+   bordercolor|
+   borderstyle|
+   borderwidth|
    border|
    color|
    colorscheme|
-   cols|
-   font-family|
-   label|
+   comment|
+   columns|
+   flow|
+   format|
+   gid|
+   label-pos|
    label-color|
    linkbase|
    line-height|
@@ -509,11 +523,12 @@ EOSVG
    nodeclass|
    padding.*|
    rows|
+   root|
    size|
    style|
    shape|
    title|
-   text-align|
+   type|
    text-style|
    width|
    rotate|
@@ -522,14 +537,21 @@ EOSVG
   my $overlay = {
     edge => {
       "stroke" => 'black',
-      "text-anchor" => 'middle',
+      "text-align" => 'center',
       "font-size" => '13px',
     },
     node => {
       "font-size" => '16px',
-      "text-anchor" => 'middle',
+      "text-align" => 'center',
     },
   };
+  my $label = $self->label();
+  $overlay->{graph} =
+    {
+    "font-size" => '16px',
+    "text-align" => 'center',
+    "border" => '1px dashed #808080',
+    };
   # generate the class attributes first
   my $style = $self->_class_styles( $skip, $mutator, '', ' ', $overlay);
 
@@ -543,14 +565,19 @@ EOSVG
   ###########################################################################
   # prepare graph label output
 
-  my $label = $self->label();
   my $lp = 'top';
+  my ($lw,$lh) = Graph::Easy::Node::_svg_dimensions($self);
+  # some padding on the label
+  $lw = int($em*$lw + $em + 0.5); $lh = int($LINE_HEIGHT*$lh+0.5);
 
   if ($label ne '')
     {
     $lp = $self->attribute('labelpos');
 
-    $my += $em * 2;
+    # handle the case where the graph label is bigger than the graph itself
+    $mx = $em + $lw if $mx < ($lw+$em);
+
+    $my += $lh;
     }
 
   ###########################################################################
@@ -609,21 +636,24 @@ EOSVG
 
   if ($label ne '')
     {
-    my $y = $yl + $em; $y = $my - 2 * $em if $lp eq 'bottom';
+    my $y = $yl + $em / 2; $y = $my - $lh + $em/2 if $lp eq 'bottom';
 
     # also include a link on the label if nec.
     my $link = $self->link();
 
-    my $l = "  <!-- graph label -->\n" .
-            Graph::Easy::Node::_svg_text($self, 
-		$self->color_attribute('color') || 'black', $em, '  ', $mx / 2, $y);
+    my $l = Graph::Easy::Node::_svg_text($self, 
+		$self->color_attribute('color') || 'black', '  ',
+		$mx / 2, $y, undef, $em / 2, $mx - $em/2);
+
+    $l =~ s/<text /<text class="graph" /;
+    $l = "  <!-- graph label -->\n" . $l;
 
     $l = Graph::Easy::Node::_link($self, $l, '', $title, $link) if $link ne '';
 
     $txt .= $l;
 
     # push content down if label is at top
-    $yl += $em * 2 if $lp eq 'top';
+    $yl += $lh if $lp eq 'top';
     }
 
   # Now output cells that belong to one edge/node together.
@@ -631,19 +661,23 @@ EOSVG
   for my $n ($self->groups(), $self->edges(), $self->sorted_nodes())
     {
     my $x = $xl; my $y = $yl;
-    if (ref($n) eq 'Graph::Easy::Node')
+    if ((ref($n) eq 'Graph::Easy::Node')
+       || (ref($n) eq 'Graph::Easy::Node::Anon'))
       {
       # get position from cell
       $x += $cols->{ $n->{x} };
       $y += $rows->{ $n->{y} };
       }
 
-    my $class = $n->{class}; $class =~ s/\./_/;	# node.city => node-city
+    my $class = $n->class(); $class =~ s/\./_/;	# node.city => node-city
     my $obj_txt = $n->as_svg($x,$y,' ', $rows, $cols);
     if ($obj_txt ne '')
       {
       $obj_txt =~ s/\n\z/<\/g>\n\n/;
-      $txt .= "<g class=\"$class\">\n" . $obj_txt; 
+      my $id = $n->attribute('id');
+      $id = $n->{id} if $id eq '';
+      $id =~ s/([\"\\])/\\$1/g;
+      $txt .= "<g id=\"$id\" class=\"$class\">\n" . $obj_txt; 
       }
     }
 
@@ -709,7 +743,7 @@ L<Graph::Easy>.
 
 =head1 AUTHOR
 
-Copyright (C) 2004 - 2006 by Tels L<http://bloodgate.com>
+Copyright (C) 2004 - 2008 by Tels L<http://bloodgate.com>
 
 See the LICENSE file for information.
 
@@ -967,7 +1001,9 @@ sub as_svg
   # output a node as SVG
   my ($self,$x,$y,$indent) = @_;
 
-  my $name = $self->{att}->{label}; $name = $self->{name} unless defined $name;
+  my $name = $self->{att}->{label};
+  $name = $self->{name} if !defined $name;
+  $name = 'anon node ' . $self->{name} if $self->{class} eq 'node.anon';
 
   my $em = $self->EM();		# multiplication factor chars * em = units (pixels)
 
@@ -991,7 +1027,7 @@ sub as_svg
   my $old_indent = $indent; $indent = $indent x 2 if $link ne '';
 
   my $out_name = Graph::Easy::As_svg::_quote_name($name);
-  my $svg = "$indent<!-- $out_name, $shape -->\n";
+  my $svg = "$indent<!-- $out_name, $s -->\n";
 
   # render the background, except for "rect" where it is not visible
   $svg .= $self->_svg_background($x,$y, $indent) if $shape ne 'rect';
@@ -1004,20 +1040,28 @@ sub as_svg
   # render the node shape itself
   if ($shape eq 'point')
     {
-    # include the point-style
-    my $s = $self->attribute('point-style') || 'star';
+    # include the point-shape
+    my $s = $self->attribute('pointshape');
 
     if ($s ne 'invisible')
       {
-      $s = 'd-' . $s if $bs =~ /^double/ && $s =~ /^(square|diamond|circle)\z/;
+      $s = 'd-' . $s if $bs =~ /^double/ && $s =~ /^(square|diamond|circle|star)\z/;
+    
+      my $ps = $self->attribute('pointstyle');
+
+      # circle => filledcircle
+      #$s = 'f-' . $s if $ps eq 'filled' && $s =~ /^(square|diamond|circle|star)\z/;
 
       my $a = { };
       for my $key (keys %$att)
         {
         $a->{$key} = $att->{$key};
         }
-      $a->{stroke} = $self->color_attribute('border-color') || 'black';
-      $a->{fill} = $a->{stroke} if $s eq 'dot';
+      $a->{stroke} = $self->color_attribute('bordercolor');
+      if ($s eq 'dot' || $ps eq 'filled')
+	{
+        $a->{fill} = $a->{stroke};
+        }
 
       my $att_txt = $self->_svg_attributes_as_txt($a, $xt, $yt);
 
@@ -1113,7 +1157,7 @@ sub as_svg
   
     my $color = $self->color_attribute('color') || 'black';
 
-    $svg .= $self->_svg_text($color, $em, $indent, $xt, $yt, 
+    $svg .= $self->_svg_text($color, $indent, $xt, $yt, 
 		       # left    # right
 		undef, int($x + $em/2), int($x + $self->{w} - $em/2));
     }
@@ -1379,7 +1423,9 @@ sub _svg_attributes_as_txt
   foreach my $e (sort keys %$att)
     {
     # skip these
-    next if $e =~ /^(arrowstyle|textstyle|labelcolor|rows|cols|size|offset|origin|rotate|colorscheme)\z/;
+    next if $e =~ 
+	/^(arrow-?style|arrow-?shape|text-?style|label-?color|
+	  rows|columns|size|offset|origin|rotate|colorscheme)\z/x;
 
     $att_line .= " $e=\"$att->{$e}\"";
     if (length($att_line) > 75)
@@ -1607,7 +1653,16 @@ sub _svg_arrow
     }
   elsif ($arrow_style eq 'filled')
     {
-    $a->{fill} = $self->color_attribute('fill');
+    # if fill is not defind, use the color
+    my $fill = $self->raw_attribute('fill');
+    if (defined $fill)
+      {
+      $a->{fill} = $self->color_attribute('fill');
+      }
+    else
+      {
+      $a->{fill} = $self->color_attribute('color');
+      }
     }
   elsif ($class eq 'ahb')
     {
@@ -2068,7 +2123,7 @@ sub as_svg
       # fall back to color if label-color not defined
       $color = $self->color_attribute('color') if !defined $color;
 
-      $svg .= $self->_svg_text($color, $em, $indent, $xt, $yt, $style);
+      $svg .= $self->_svg_text($color, $indent, $xt, $yt, $style);
       }
     } 
 

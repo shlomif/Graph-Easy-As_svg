@@ -5,7 +5,7 @@ use strict;
 
 BEGIN
    {
-   plan tests => 75;
+   plan tests => 76;
    chdir 't' if -d 't';
    use lib '../lib';
    use_ok ("Graph::Easy") or die($@);
@@ -266,4 +266,19 @@ $svg = $graph->as_svg();
 
 like ($svg, qr/class="node_cities"/, 'node.cities => node_cities');
 like ($svg, qr/.node,\s*.node_cities/, 'node.cities => node_cities');
+
+#############################################################################
+# edges with no fill but arrowstyle: fill
+
+$graph = Graph::Easy->new();
+
+$edge = $graph->add_edge ('A','B');
+
+$edge->set_attribute('arrowstyle','filled');
+$edge->set_attribute('color','green');
+
+$svg = $graph->as_svg();
+
+like ($svg, qr/fill="#008000"/, 'edge fill is not inherit');
+
 

@@ -1,7 +1,9 @@
 
 =head1 INSTALL
 
-To install this module type the following:
+To install this module do the following:
+
+=head2 LINUX, UNIX etc.
 
 Untar the package:
 
@@ -71,10 +73,30 @@ If all tests pass, install the package:
 
         sudo make install
 
+=head2 WINDOWS
+
+When the package verified okay (see above), then proceed:
+
+You need the "nmake" utility from Microsoft:
+
+	http://johnbokma.com/perl/make-for-windows.html
+
+=head3 nmake
+
+Then you can build the Makefile and finally run the tests and
+install this package:
+
+        perl Makefile.PL
+        nmake test
+
+If all tests pass, install the package:
+
+        nmake install
+
 AUTHOR
 ======
 
-Copyright (C) 2004 - 2005 by Tels http://bloodgate.com/perl/
+Copyright (C) 2004 - 2008 by Tels http://bloodgate.com/perl/
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms of the GPL version 2.
