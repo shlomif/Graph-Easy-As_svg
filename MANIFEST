@@ -25,7 +25,6 @@ MANIFEST.SKIP
 META.yml			Module meta-data (added by MakeMaker)
 README
 SIGNATURE
-svg
 t/group.t			SVG output for groups (subgraphs/clusters)
 t/output.t
 t/pod.t				test POD for correctness

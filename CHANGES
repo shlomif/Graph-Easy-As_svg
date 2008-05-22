@@ -1,6 +1,21 @@
 Revision history for Graph::Easy::As_svg:
 
-2008-03-30 v0.22 Tels 127 tests - Fix, fix, fix, fix the bugs...
+2008-05-22 v0.23 Tels 137 tests - Fix, fix, fix, fix the bugs...
+  * require Graph::Easy v0.63 (for correct graph attribute output)
+  * suppress attributes without "-" (like "labelpos" vs. "label-pos")
+  * output the "font-family" style to support the "font" attribute
+  * center graph when the graph label is wider than the graph itself
+  * shift graph by half the border with down and right to prevent the border
+    from getting cut off
+  * don't draw end arrows on undirected edges (with more than one cell)
+  * "rounded" nodes have their corners correctly filled with the background
+    color (f.i. when inside a group) (Thanx Dieter Wunderer!)
+  * quote "&" in links (Thanx Emmanuel Quevillon!)
+  * links on edge labels were missing (Thanx Emmanuel Quevillon!)
+  * tweak width of digits to create more fitting labels (Thanx Emmanuel Quevillon!)
+  * better text for labels (alignment and tweaks) (Thanx Emmanuel Quevillon!)
+
+2008-03-30 v0.22 Tels 127 tests
   * require Graph::Easy v0.62
   * remove Build.PL (bundle Module::Install 0.71)
   * fix class attribute set on primary class, this colors all nodes red:

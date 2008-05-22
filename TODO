@@ -3,6 +3,7 @@ Todo for Graph-Easy-As_svg
 
 Output bugs:
 
+* a graph border of double is rendered as single
 * Anon groups should not have a border
 * Borders on nodes/graph are placed on the path center. Instead they should
   be inside the shape, aka moved BORDER-WIDTH/2 to the inside.
@@ -28,6 +29,8 @@ Shorter output:
   each <line>
 * merge all group cells together to create a minimum number of rectangles
   to render
+* font-family and font-size are output needless even when they are the
+  default values
 
 Browser-specific woes:
 

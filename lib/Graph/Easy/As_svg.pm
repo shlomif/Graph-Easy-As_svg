@@ -7,7 +7,7 @@ package Graph::Easy::As_svg;
 
 use vars qw/$VERSION/;
 
-$VERSION = '0.22';
+$VERSION = '0.23';
 
 use strict;
 use utf8;
@@ -44,10 +44,10 @@ sub _text_length
   $match = $text =~ tr/ELPaäevyz\\\/-//;
   $len += $match * 0.6 * $em; $count -= $match;
 
-  $match = $text =~ tr/BZFbdghknopqux~üö//;
+  $match = $text =~ tr/1BZFbdghknopqux~üö//;
   $len += $match * 0.65 * $em; $count -= $match;
 
-  $match = $text =~ tr/KCVXY%//;
+  $match = $text =~ tr/KCVXY%023456789//;
   $len += $match * 0.7 * $em; $count -= $match;
 
   $match = $text =~ tr/§€//;
@@ -74,7 +74,7 @@ sub _text_length
   $match = $text =~ tr/æ//;
   $len += $match * 1.25 * $em; $count -= $match;
 
-  $len += $count * $em;					# anything left over is 1.0
+  $len += $count * $em;					# anything else is 1.0
 
   # return length in "characters"
   $len / $em;
@@ -293,6 +293,13 @@ sub text_styles_as_svg
     $style .= " text-decoration=\"$s\"" if $s;
     }
 
+  my @styles;
+
+  # XXX TODO: this will needless include the font-family if set via
+  # "node { font: X }:
+  my $ff = $self->attribute('font');
+  push @styles, "font-family:$ff" if $ff;
+
   # XXX TODO: this will needless include the font-size if set via
   # "node { font-size: X }:
 
@@ -301,8 +308,9 @@ sub text_styles_as_svg
   # XXX TODO:
   # the 'style="font-size:XXpx"' is nec. for Batik 1.5 (Firefox and Opera also
   # handle 'font-size="XXpx"'):
+  push @styles, "font-size:${fs}px" if $fs;
 
-  $style .= " style=\"font-size:${fs}px\"" if $fs;
+  $style .= ' style="' . (join(";", @styles)) . '"' if @styles > 0;
 
   $style;
   }
@@ -326,6 +334,8 @@ sub _svg_text
   # We can't just join them togeter with 'x=".." dy="1em"' because Firefox 1.5
   # doesn't support this (Batik does, tho). So calculate x and y on each tspan:
 
+  #print STDERR "# xl $xl xr $xr\n";
+
   my $label = '';
   if (@$lines > 1)
     {
@@ -340,6 +350,7 @@ sub _svg_text
       $line = _quote($line); 
       my $all = $aligns->[$i+1] || substr($align,0,1);
       my $al = ' text-anchor="' . $al_map->{$all} . '"';
+      #print STDERR "$line $al $all $align\n";
       $al = '' if $all eq substr($align,0,1);
       my $xc = $x;
       $xc = $xl if ($all eq 'l');
@@ -358,8 +369,6 @@ sub _svg_text
 
   my $fs; $fs = $self->text_styles_as_svg() if $label ne '';
   $fs = '' unless defined $fs;
-
-  my $link = _quote($self->link());
 
   # For an edge, the default stroke is black, but this will render a black
   # outline around colored text. So disable the stroke with "none".
@@ -404,7 +413,7 @@ sub _remap_font_size
     $val = $self->_font_size_in_pixels( 16, $val ) . 'px';
     }
 
-  ($att, $val);
+  ('font-size', $val);
   }
 
 sub _adjust_dasharray
@@ -501,7 +510,7 @@ EOSVG
     'font' => 'font-family',
     };
   my $skip = qr/^(
-   arrow-(style|shape)|
+   arrow(style|shape)|
    (auto)?(link|title|label)|
    bordercolor|
    borderstyle|
@@ -514,8 +523,8 @@ EOSVG
    flow|
    format|
    gid|
-   label-pos|
-   label-color|
+   labelpos|
+   labelcolor|
    linkbase|
    line-height|
    letter-spacing|
@@ -529,7 +538,7 @@ EOSVG
    shape|
    title|
    type|
-   text-style|
+   textstyle|
    width|
    rotate|
    )\z/x;
@@ -545,7 +554,6 @@ EOSVG
       "text-align" => 'center',
     },
   };
-  my $label = $self->label();
   $overlay->{graph} =
     {
     "font-size" => '16px',
@@ -570,12 +578,19 @@ EOSVG
   # some padding on the label
   $lw = int($em*$lw + $em + 0.5); $lh = int($LINE_HEIGHT*$lh+0.5);
 
+  my $label = $self->label();
   if ($label ne '')
     {
     $lp = $self->attribute('labelpos');
 
     # handle the case where the graph label is bigger than the graph itself
-    $mx = $em + $lw if $mx < ($lw+$em);
+    if ($mx < ($lw+$em))
+      {
+      # move the content to the right to center it
+      $xl += (($lw+$em) - $mx) / 2; 
+      # and then make the graph more wide
+      $mx = $em + $lw;
+      }
 
     $my += $lh;
     }
@@ -583,11 +598,13 @@ EOSVG
   ###########################################################################
   # output the graph's background and border
 
+  my $em2 = $em / 2;
+
   {
     # 'inherit' only works for HTML, not for SVG
     my $bg = $self->color_attribute('fill'); $bg = 'white' if $bg eq 'inherit';
-    my $br = $self->attribute('borderstyle');
-    my $cl = $self->color_attribute('bordercolor'); $cl = $bg if $br eq 'none';
+    my $bs = $self->attribute('borderstyle');
+    my $cl = $self->color_attribute('bordercolor'); $cl = $bg if $bs eq 'none';
     my $bw = $self->attribute('borderwidth') || 1;
 
     $bw =~ s/px//;
@@ -598,7 +615,7 @@ EOSVG
 
     # XXX TODO adjust dasharray
     my $att = {
-      'stroke-dasharray' => $strokes->{$br} || '',
+      'stroke-dasharray' => $strokes->{$bs} || '',
       'stroke-width' => $bw,
       'stroke' => $cl,
       'fill' => $bg,
@@ -608,11 +625,10 @@ EOSVG
 
     my $d = $self->_svg_attributes_as_txt($self->_adjust_dasharray($att));
 
-    my $em2 = $em / 2;
     my $xr = $mx + $em2;
     my $yr = $my + $em2;
 
-    if ($br ne '')
+    if ($bs ne '')
       {
       # Provide some padding around the graph to avoid that the border sticks
       # very close to the edge
@@ -626,8 +642,9 @@ EOSVG
       $my += $em + 4 * $bw;
       }
 
+    my $bw_2 = $bw / 2;
     $txt .= '<!-- graph background with border (mainly for printing) -->' .
-        "\n<rect x=\"0\" y=\"0\" width=\"$xr\" height=\"$yr\"$d />\n\n";
+        "\n<rect x=\"$bw_2\" y=\"$bw_2\" width=\"$xr\" height=\"$yr\"$d />\n\n";
 
     } # end outpuf of background
 
@@ -636,14 +653,14 @@ EOSVG
 
   if ($label ne '')
     {
-    my $y = $yl + $em / 2; $y = $my - $lh + $em/2 if $lp eq 'bottom';
+    my $y = $yl + $em2; $y = $my - $lh + $em2 if $lp eq 'bottom';
 
     # also include a link on the label if nec.
-    my $link = $self->link();
+    my $link = _quote($self->link());
 
     my $l = Graph::Easy::Node::_svg_text($self, 
 		$self->color_attribute('color') || 'black', '  ',
-		$mx / 2, $y, undef, $em / 2, $mx - $em/2);
+		$mx / 2, $y, undef, $em2, $mx - $em2);
 
     $l =~ s/<text /<text class="graph" /;
     $l = "  <!-- graph label -->\n" . $l;
@@ -766,8 +783,6 @@ sub as_svg
 sub _correct_size_svg
   {
   my $self = shift;
-
-  my $em = $self->EM();		# multiplication factor chars * em = units (pixels)
 
   $self->{w} = 3;
   $self->{h} = 3;
@@ -946,10 +961,12 @@ BEGIN
 sub _svg_dimensions
   {
   # Returns the dimensions of the node/cell derived from the label (or name) in characters.
-  my $self = shift;
+  my ($self) = @_;
 
-  my $align = $self->attribute('align') || $self->default_attribute('align') || 'center';
-  my $text_wrap = $self->attribute('text-wrap') || 'none';
+#  my $align = $self->attribute('align') || $self->default_attribute('align') || 'center';
+#  my $text_wrap = $self->attribute('text-wrap') || 'none';
+  my $align = $self->attribute('align');
+  my $text_wrap = $self->attribute('textwrap');
   my ($lines, $aligns) = $self->_aligned_label($align, $text_wrap);
 
   my $w = 0; my $h = scalar @$lines;
@@ -1023,14 +1040,15 @@ sub as_svg
   # the original shape
   my $s = ''; $s = $self->attribute('shape') unless $self->isa_cell();
 
-  my $link = $self->link();
+  my $link = _quote($self->link());
   my $old_indent = $indent; $indent = $indent x 2 if $link ne '';
 
   my $out_name = Graph::Easy::As_svg::_quote_name($name);
   my $svg = "$indent<!-- $out_name, $s -->\n";
 
   # render the background, except for "rect" where it is not visible
-  $svg .= $self->_svg_background($x,$y, $indent) if $shape ne 'rect';
+  # (use the original shape in $s, or "rounded" will be wrong)
+  $svg .= $self->_svg_background($x,$y, $indent) if $s ne 'rect';
 
   my $bs = $self->attribute('borderstyle');
 
@@ -1091,6 +1109,7 @@ sub as_svg
     my $x1 = $xt - $w / 2;
     my $y1 = $yt - $h / 2;
 
+    $label = _quote($label);
     $svg .= "<image x=\"$x1\" y=\"$y1\" xlink:href=\"$label\" width=\"$w\" height=\"$h\" />\n";
     }
   else
@@ -1142,8 +1161,6 @@ sub as_svg
 
     ###########################################################################
     # include the label/name/text
-
-    my $label = $self->label();
 
     my ($w,$h) = $self->_svg_dimensions();
     my $lh = $self->LINE_HEIGHT();
@@ -1583,14 +1600,22 @@ my $arrow_pos = {
   };
 
 my $arrow_correct = {
-  EDGE_END_S()		=> [ 'h', 3.5, 'w', 2 ],
-  EDGE_END_N()		=> [ 'h', 3.5, 'w', 2 ],
-  EDGE_START_S()	=> [ 'h', 3 ],
-  EDGE_START_N()	=> [ 'h', 3 ],
-  EDGE_END_W()		=> [ 'w', 1.5, 'h', 2 ],
-  EDGE_END_E()		=> [ 'w', 1.5, 'h', 2 ],
+  EDGE_END_S()		=> [ 'h', 1.5 ],
+  EDGE_END_N()		=> [ 'h', 1.5 ],
+  EDGE_START_S()	=> [ 'h', 1 ],
+  EDGE_START_N()	=> [ 'h', 1 ],
+  EDGE_END_W()		=> [ 'w', 1.5 ],
+  EDGE_END_E()		=> [ 'w', 1.5 ],
   EDGE_START_W()	=> [ 'w', 1, ],
   EDGE_START_E()	=> [ 'w', 1, ],
+#  EDGE_END_S()		=> [ 'h', 3.5, 'w', 2 ],
+#  EDGE_END_N()		=> [ 'h', 3.5, 'w', 2 ],
+#  EDGE_START_S()	=> [ 'h', 3 ],
+#  EDGE_START_N()	=> [ 'h', 3 ],
+#  EDGE_END_W()		=> [ 'w', 1.5, 'h', 2 ],
+#  EDGE_END_E()		=> [ 'w', 1.5, 'h', 2 ],
+#  EDGE_START_W()	=> [ 'w', 1, ],
+#  EDGE_START_E()	=> [ 'w', 1, ],
   };
 
 sub _arrow_pos
@@ -1799,6 +1824,7 @@ sub _svg_path
   my ($self, $x, $y, $s, $e, $add, $lw, @coords) = @_;
 
   my $em = $self->EM();
+
   my $w = $self->{w};
   my $h = $self->{h};
 
@@ -1828,9 +1854,9 @@ sub _correct_size_svg
   # correct the size for the edge cell
   my ($self,$format) = @_;
 
-  my $em = $self->EM();		# multiplication factor chars * em = units (pixels)
-
   return if defined $self->{w};
+
+  my $em = $self->EM();		# multiplication factor chars * em = units (pixels)
 
   #my $border = $self->{edge}->attribute('borderstyle');
 
@@ -1846,18 +1872,22 @@ sub _correct_size_svg
     {
     my ($w,$h) = $self->_svg_dimensions();
 
-    # for vertical edges, multiply $w * 2 and add 2 em
-    my $lh = $self->LINE_HEIGHT();
+    # for vertical edges, multiply $w * 2
     $w = $w * 2 + 2 if ($type == EDGE_VER);
+    # add a bit for HOR edges
+    $w = $w + 1 if ($type == EDGE_HOR);
     $self->{w} += $w;
-    $self->{h} += $h * ($lh - $em);
+    my $lh = $self->LINE_HEIGHT();
+    $self->{h} += $h * ($lh - $em) + 0.5;
+    # add a bit for HOR edges
+    $self->{h} += 2 if ($type == EDGE_HOR);
     }
 
   my $style = $self->{style};
 
   # correct for bigger arrows
   my $ac = $self->arrow_count();
-  if ($style =~ /^(broad|wide)/)
+#  if ($style =~ /^(broad|wide)/)
     {
     # for each end point, correct the size
     my $flags = ($self->{type} & EDGE_ARROW_MASK);
@@ -1874,7 +1904,7 @@ sub _correct_size_svg
         my $idx = 0;
 	while ($idx < @$ac)
           {
-          my ($where, $add) = ($ac->[$idx], $ac->[$idx+1]); $idx +=2 ;
+          my ($where, $add) = ($ac->[$idx], $ac->[$idx+1]); $idx +=2;
           $add += 0.5 if $style =~ /^wide/;
           $self->{$where} += $add;
           }
@@ -1927,6 +1957,7 @@ sub as_svg
   my ($self,$x,$y, $indent) = @_;
 
   my $em = $self->EM();		# multiplication factor chars * em = units (pixels)
+  my $lh = $self->LINE_HEIGHT();
 
   # the attributes of the element we will finally output
   my $att = $self->_svg_attributes($em);
@@ -2049,7 +2080,8 @@ sub as_svg
 
   # depending on end points, add the arrows
   my $scale = $att->{'stroke-width'}||1; 
-  $svg .= $self->_svg_arrow($att, $x, $y, $arrow, $indent, $scale) unless $arrow == 0;
+  $svg .= $self->_svg_arrow($att, $x, $y, $arrow, $indent, $scale)
+	unless $arrow == 0 || $self->{edge}->undirected();
 
   ###########################################################################
   # include the label/name/text if we are the label cell
@@ -2060,9 +2092,11 @@ sub as_svg
 
     if ($label ne '')
       {
+      my ($w,$h) = $self->dimensions();
       my $em2 = $em / 2;
       my $xt = int($x + $self->{w} / 2);
-      my $yt = int($y + ($self->{h} / 2) - $em2);
+      my $yt = int($y + $self->{h} / 2 - $lh / 3 - ($h - 1) * $lh);
+#      my $yt = int($y + ($self->{h} / 2) - $em2);
 
       my $style = '';
 
@@ -2071,6 +2105,9 @@ sub as_svg
       # for HOR edges
       if ($type == EDGE_HOR)
         {
+        # put the edge text left-aligned on the line
+        $xt = $x + 2 * $em;
+
         # if we have only one big arrow, shift the text left/right
         my $ac = $self->arrow_count();
         my $style = $self->{style};
@@ -2082,14 +2119,15 @@ sub as_svg
           $shift = 0.8 if $style =~ /^wide/;
           # <-- edges, shift right, otherwise left
           $shift = -$shift if ($end & EDGE_END_E) != 0;
-          $xt = int($xt + $em * $shift);
+          #print STDERR "# shift=$shift \n";
+          $xt = int($xt + 2 * $em * $shift);
           }
         }
       elsif ($type == EDGE_VER)
         {
-	# put label right of the edge
-	my ($w,$h) = $self->dimensions();
+	# put label on the right side of the edge
 	$xt = $xt + $em2;
+	my ($w,$h) = $self->dimensions();
         $yt = int($y + $self->{h} / 2 - $h * $em2 + $em2);
 	$style = ' text-anchor="start"';
         }
@@ -2097,7 +2135,7 @@ sub as_svg
       else
         {
 	# put label right of the edge
-	my ($w,$h) = $self->dimensions();
+#	my ($w,$h) = $self->dimensions();
 
 	# hor loops:
 	$yt += $em2 if $stype & EDGE_START_N;
@@ -2123,7 +2161,13 @@ sub as_svg
       # fall back to color if label-color not defined
       $color = $self->color_attribute('color') if !defined $color;
 
-      $svg .= $self->_svg_text($color, $indent, $xt, $yt, $style);
+      my $text = $self->_svg_text($color, $indent, $xt, $yt, $style, $xt, $x + $self->{w} - $em);
+
+      my $link = _quote($self->link());
+      $text = Graph::Easy::Node::_link($self, $indent.$text, $indent, $title, $link) if $link ne '';
+
+      $svg .= $text;
+
       }
     } 
 

@@ -5,7 +5,7 @@ use strict;
 
 BEGIN
    {
-   plan tests => 76;
+   plan tests => 86;
    chdir 't' if -d 't';
    use lib '../lib';
    use_ok ("Graph::Easy") or die($@);
@@ -197,7 +197,7 @@ $edge->set_attribute('font-size', '2em');
 
 $svg = $graph->as_svg();
 my $expect = $graph->EM() * 2;
-like ($svg, qr/style="font-size:${expect}px"/, '2em');
+like ($svg, qr/style=".*font-size:${expect}px"/, '2em');
 
 #############################################################################
 # <title>
@@ -281,4 +281,72 @@ $svg = $graph->as_svg();
 
 like ($svg, qr/fill="#008000"/, 'edge fill is not inherit');
 
+#############################################################################
+# check that we really filter out labelpos etc.
+
+$graph = Graph::Easy->new();
+$edge = $graph->add_edge ('A','B');
+$edge->set_attribute('arrow-shape','triangle');
+$edge->set_attribute('arrow-style','open');
+$graph->set_attribute('label-pos','bottom');
+$graph->set_attribute('text-style','bold');
+$graph->node('A')->set_attribute('auto-title','label');
+$graph->node('B')->set_attribute('auto-label','10');
+
+$svg = $graph->as_svg();
+
+for my $not (qw/labelpos arrowshape arrowstyle autotitle autolabel textstyle/)
+  {
+  unlike ($svg, qr/$not/, "$not not output");
+  }
+
+#############################################################################
+# see that we output the font for the graph itself
+
+$graph = Graph::Easy->new();
+$edge = $graph->add_edge ('A','B');
+$graph->set_attribute('font','Foo');
+$graph->set_attribute('label','Labels');
+
+$svg = $graph->as_svg();
+
+like ($svg, qr/font-family: Foo/, "font-family was output");
+
+#############################################################################
+# see that we output the font for the nodes
+
+$graph = Graph::Easy->new();
+$edge = $graph->add_edge ('A','B');
+$graph->set_attribute('font','Foo');
+$graph->node('A')->set_attribute('font','Fooobar');
+
+$svg = $graph->as_svg();
+
+like ($svg, qr/font-family:Fooobar/, "font-family for node was output");
+
+#############################################################################
+# output background for rounded nodes in groups
+
+$graph = Graph::Easy->new();
+my ($A,$B);
+($A,$B,$edge) = $graph->add_edge ('A','B');
+my $group = $graph->add_group ('');
+$group->add_node($A);
+$graph->node('A')->set_attribute('shape','rounded');
+
+$svg = $graph->as_svg();
+
+# rect x="19" y="19" width="5" height="3" fill="#a0d0ff"
+like ($svg, qr/rounded(.|\n)+rect.+fill=".a0d0ff"/, "background for rounded node");
+
+#############################################################################
+# quote "&" in links as well as add links on edges
+
+$graph = Graph::Easy->new();
+($A,$B,$edge) = $graph->add_edge ('A','B','test');
+$edge->set_attribute('link','http://bloodgate.com/?foo=a&bar=b');
+
+$svg = $graph->as_svg();
+
+like ($svg, qr/xlink:href="http:\/\/bloodgate.com.*\&amp;/, "link has &amp;");
 
