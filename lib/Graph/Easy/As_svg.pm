@@ -6,9 +6,8 @@
 package Graph::Easy::As_svg;
 
 use 5.010;
-use vars qw/$VERSION/;
 
-$VERSION = '0.23';
+our $VERSION = '0.23';
 
 use strict;
 use warnings;
@@ -775,8 +774,6 @@ X<tels>
 
 package Graph::Easy::Node::Cell;
 
-use vars qw/$VERSION/; $VERSION = '0.01';
-
 sub as_svg
   {
   '';
@@ -795,8 +792,6 @@ sub _correct_size_svg
 #############################################################################
 
 package Graph::Easy::Group::Cell;
-
-use vars qw/$VERSION/; $VERSION = '0.01';
 
 sub as_svg
   {
@@ -879,8 +874,6 @@ sub _svg_background
 
 package Graph::Easy::Group;
 
-use vars qw/$VERSION/; $VERSION = '0.01';
-
 sub as_svg
   {
   # output all cells of the group as svg
@@ -901,8 +894,6 @@ sub as_svg
 #############################################################################
 
 package Graph::Easy::Edge;
-
-use vars qw/$VERSION/; $VERSION = '0.01';
 
 use Graph::Easy::Edge::Cell qw/EDGE_HOLE/;
 
@@ -938,8 +929,6 @@ sub as_svg
 
 package Graph::Easy::Node::Empty;
 
-use vars qw/$VERSION/; $VERSION = '0.01';
-
 sub as_svg
   {
   # empty nodes are not rendered at all
@@ -950,8 +939,6 @@ sub as_svg
 #############################################################################
 
 package Graph::Easy::Node;
-
-use vars qw/$VERSION/; $VERSION = '0.01';
 
 BEGIN
   {
@@ -1523,8 +1510,6 @@ sub _correct_size_svg
 #############################################################################
 
 package Graph::Easy::Edge::Cell;
-
-use vars qw/$VERSION/; $VERSION = '0.01';
 
 BEGIN
   {
