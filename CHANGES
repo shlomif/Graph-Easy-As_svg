@@ -83,7 +83,7 @@ Revision history for Graph::Easy::As_svg:
   * close the gaps on edges with style double
   * fix the fontsize (was missing a "px") and also use 16 as the base vs. 14
     This makes the text independed from the user setting in the browser, and
-    also increases it to be more readable. 
+    also increases it to be more readable.
   * always include the fill, to help renderers that can't cope with CSS styles
   * fix rendering of multiline labels:
     + lineheight is 18px vs 1em to not have the lines drawn together
@@ -143,7 +143,7 @@ Revision history for Graph::Easy::As_svg:
   * require Graph::Easy v0.33
   * add PREREQ_FATAL to Makefile.PL
   * support bold-dash, broad and wide edge/border styles
-  * correct node-sizes to accomodate border-width  
+  * correct node-sizes to accomodate border-width
   * shorten edge-pieces with labels a bit
   * implement a crude version of _text_length(), returning the text length
     in pixels depending on EM and the string content ("WW" vs. "ii"). This
@@ -162,7 +162,7 @@ Revision history for Graph::Easy::As_svg:
   * don't draw background if bg eq ''
   * add support for attribute "font-size"
   * add support for attribute "text-style"
-  * calculate the correct size for edge cells with a label  
+  * calculate the correct size for edge cells with a label
   * include xmlns:xlink too, to make Firefox 1.5x happy
   * include version of Graph::Easy::As_svg in output, too
   * for edge labels: fallback to the color of the edge did not work
@@ -203,7 +203,7 @@ Revision history for Graph::Easy::As_svg:
   * draw graph background, border and label if nec.
   * double lines on edges are rendered better at the arrow-ends
   * add support for the following node shapes:
-    + invhouse, octagon, hexagon, septagon, parallelogram, trapezium 
+    + invhouse, octagon, hexagon, septagon, parallelogram, trapezium
   * draw background for non-rect nodes
   * correctly draw "border-style: double" on the various node shapes
   * draw backgrounds for edge cells (for groups and when background is set)
@@ -217,7 +217,7 @@ Revision history for Graph::Easy::As_svg:
   * arrow lines on non-solid edges are now solid (instead of dashed etc)
   * render the different arrow styles (closed, open, filled)
   * render nodes with "shape: point"
-  * produce shorter code by using default attributes/classes better 
+  * produce shorter code by using default attributes/classes better
   * render node shapes: diamond, house, triangle, invtriangle
   * render edge style "double-dash"
   * "fill" is the fill color, "background" the background

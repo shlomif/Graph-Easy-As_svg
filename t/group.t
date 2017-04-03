@@ -40,7 +40,7 @@ for my $name (qw/Bonn Berlin Rostock/)
   $last = $node;
   }
 
-$group->add_node( $graph->add_node('Wismut') );  
+$group->add_node( $graph->add_node('Wismut') );
 $graph->add_edge('Berlin','Wismut');
 
 $svg = $graph->as_svg();

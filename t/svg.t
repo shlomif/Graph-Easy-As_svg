@@ -119,7 +119,7 @@ is ($berlin->successors(), 0, 'no pre');
 is ($bonn->successors(), 1, 'one pre');
 is ($berlin->predecessors(), 1, 'one pre');
 
-is (keys %{$graph->{cells}}, 0, 'no cells'); 
+is (keys %{$graph->{cells}}, 0, 'no cells');
 is ($bonn->{graph}, $graph, 'graph is ok');
 is ($berlin->{graph}, $graph, 'graph is ok');
 is ($edge->{graph}, $graph, 'graph on edge is ok');
@@ -155,7 +155,7 @@ like ($svg, qr/stroke-dasharray/, 'double dash contains dash array');
 
 #############################################################################
 # unused definitions are not in the output
- 
+
 unlike ($svg, qr/(diamond|circle|triangle)/, 'unused defs are not there');
 
 #############################################################################

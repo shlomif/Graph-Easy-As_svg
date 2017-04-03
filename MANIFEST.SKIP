@@ -1,3 +1,4 @@
+~\z
 .*\.tar\.gz
 ^blib.*
 ^[\w\.]+\.(html|txt|png|gif|dot|pl|svg|old|bak|org|vcg|gdl)

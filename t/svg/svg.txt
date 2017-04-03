@@ -12,17 +12,17 @@ group { fill: peru; }
   [ Berlin ] -> { arrow-style: closed; } [ Ulm ]
   [ Ulm ] { shape: house; } .-> { color: #a02020; } [ Koblenz]
   [ Ulm ] ..-> [ Konstanz ] { shape: diamond; fill: peru; border: none; background: yellow; }
-  
+
   [ Konstanz ] --> { arrow-style: filled; fill: red; } [ Mainz ] { shape: triangle; }
- 
-  [ Koblenz ] { shape: invtriangle; } 
+
+  [ Koblenz ] { shape: invtriangle; }
 
 node.point { shape: point; flow: south; }
 node.doublepoint { border-style: double; shape: point; flow: east; }
 node.double { border: double white; fill: palevioletred; }
 node.doubledash { border: double-dash yellow; fill: crimson; }
 
-( Stars   
+( Stars
   [ A ] { point-style: star; color: red; } ->		# background ignored
   [ B ] { point-style: circle; fill: dodgerblue; } ->
   [ C ] { point-style: circle; fill: white; } ->
@@ -34,8 +34,8 @@ node.doubledash { border: double-dash yellow; fill: crimson; }
   [ I ] { point-style: cross; color: darkblue; }	# fill ignored
 ) { nodeclass: point; }
 
-( 
- [ Rect ] 
+(
+ [ Rect ]
   <--> [ Circle ] { shape: circle; }
   <--> [ Ellipse ] { shape: ellipse; }
   <.-> [ House ] { shape: house; }
@@ -64,9 +64,9 @@ node.doubledash { border: double-dash yellow; fill: crimson; }
   [ AH ] { point-style: circle; fill: black; } ->
   [ AI ] { point-style: cross; color: darkblue; }	# fill ignored
 ) { nodeclass: doublepoint; }
- 
-( Rect2 
- [ DRect ] { origin: Frankfurt; offset: 0,4; } 
+
+( Rect2
+ [ DRect ] { origin: Frankfurt; offset: 0,4; }
   <--> [ DCircle ] { shape: circle; }
   <.-> [ DHouse ] { shape: house; }
   <.> [ DInvHouse ] { shape: invhouse; }
