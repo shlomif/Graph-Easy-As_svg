@@ -1,6 +1,6 @@
 Revision history for Graph::Easy::As_svg:
 
-2017-04-03 v0.24 Shlomif
+0.24        2017-04-03
   * Convert from Module-Install to Dist-Zilla and did some cleanups.
     + Hopefully fix https://rt.cpan.org/Public/Bug/Display.html?id=120889
       ( Cannot install without '.' in @INC .)
