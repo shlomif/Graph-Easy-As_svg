@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl
 
 # Convert an input file containing a Graph::Easy object, then dump
 # it again as textual description.

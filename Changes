@@ -1,5 +1,10 @@
 Revision history for Graph::Easy::As_svg:
 
+0.25        2017-04-12
+  * Convert "#!/usr/bin/perl -w" shabangs to "#!/usr/bin/env perl" .
+    + Hopefully to avoid test failures such as:
+    + http://www.cpantesters.org/cpan/report/40dc5da0-18b6-11e7-ba6a-0a894c2cdaca
+
 0.24        2017-04-03
   * Convert from Module-Install to Dist-Zilla and did some cleanups.
     + Hopefully fix https://rt.cpan.org/Public/Bug/Display.html?id=120889
