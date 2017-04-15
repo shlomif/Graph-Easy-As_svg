@@ -7,7 +7,6 @@ package Graph::Easy::As_svg;
 
 use 5.010;
 
-our $VERSION = '0.23';
 
 use strict;
 use warnings;
@@ -15,7 +14,7 @@ use utf8;
 
 sub _text_length
   {
-  # Take a string, and return it's length, based on the font-size and the
+  # Take a string, and return its length, based on the font-size and the
   # contents ("iii" is shorter than "WWW")
   my ($em, $text) = @_;
 

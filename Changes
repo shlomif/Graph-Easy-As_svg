@@ -1,5 +1,10 @@
 Revision history for Graph::Easy::As_svg:
 
+0.26        2017-04-15
+  * dzil fixes - bump the $VERSION in lib/Graph/Easy/As_svg.pm .
+    + See: https://rt.cpan.org/Ticket/Display.html?id=121124
+    + Thanks to Gintautas Grigelionis .
+
 0.25        2017-04-12
   * Convert "#!/usr/bin/perl -w" shabangs to "#!/usr/bin/env perl" .
     + Hopefully to avoid test failures such as:
